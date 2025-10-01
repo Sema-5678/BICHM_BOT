@@ -313,3 +313,11 @@ async def getbc_handler(message: Message):
             balance=format_money(user_data['balance']),
         )
     )
+
+
+
+
+
+@bank_router.message(Command("donats"))
+async def cmd_shop(message: Message):
+    await message.answer(TEXTS["static"]["donats_text"])
