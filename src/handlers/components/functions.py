@@ -10,6 +10,7 @@ from config import (
     GET_BC_TIME_LIMIT,
     GET_BC_MIN_BC,
     GET_BC_MAX_BC,
+    ROBBERY_ITEMS_PER_ROW,
     MAX_BALANCE,
     MAX_BET,
     MAX_LOAN,
@@ -23,6 +24,11 @@ from common.data_for_bot import TEXTS
 MAX_BALANCE = Decimal(str(MAX_BALANCE))
 MAX_BET = Decimal(str(MAX_BET))
 
+
+
+def items_on_page(idx):
+    # print((*(ITEMS_PER_ROW,)*((idx)//ITEMS_PER_ROW), idx%ITEMS_PER_ROW, 1))
+    return  (*(ROBBERY_ITEMS_PER_ROW,)*((idx)//ROBBERY_ITEMS_PER_ROW), ROBBERY_ITEMS_PER_ROW)
 
 def is_valid_num(amount):
     """Проверяет, что число валидно"""
@@ -279,7 +285,7 @@ def get_crew_display(crew_str):
     text = TEXTS["games"]["robbery"]["crew_ready"] + "\n"
     for member_id in crew_ids:
         member = ROBBERY_CHANCES[int(member_id)]
-        text += f"+ {member['name']}: +{member['chance']}% к удаче (стоимость: {member['cost_percentage']}% от выигрыша)\n"
+        text += f"+ {member['name']}: {member['chance']*100:.2f}% к удаче (стоимость: {member['cost_percentage']*100:.2f}% от выигрыша)\n"
     return text
 
 
@@ -287,7 +293,7 @@ def add_crew_member(crew_str, new_member_id):
     if not crew_str:
         return new_member_id
     crew_ids = crew_str.split(",")
-    if new_member_id in crew_ids or len(crew_ids) >= 3:
+    if new_member_id in crew_ids or len(crew_ids) >= len(ROBBERY_CHANCES):
         return crew_str
     crew_ids.append(new_member_id)
     return ",".join(crew_ids)

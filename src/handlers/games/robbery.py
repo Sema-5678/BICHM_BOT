@@ -6,7 +6,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from config import BASE_ROBBERY_CHANCE
+from config import BASE_ROBBERY_CHANCE, ROBBERY_ITEMS_PER_ROW
 from filters.chat_types import ChatTypeFilter
 from handlers.components.functions import (
     add_crew_member,
@@ -19,6 +19,7 @@ from handlers.components.functions import (
     get_user_balance,
     can_afford,
     deduct_money,
+    items_on_page,
 )
 from handlers.components.callbacks import RobberyCallback
 from common.data_for_bot import TEXTS
@@ -48,7 +49,7 @@ async def robbery_start(message: Message):
         bet=format_money(bet),
         old_balance=format_money(old_balance),
         new_balance=format_money(new_balance),
-        base=BASE_ROBBERY_CHANCE,
+        base=f"{BASE_ROBBERY_CHANCE*100:.2f}",
         multiplier=payout_multiplier,
     )
     keyboard = InlineKeyboardBuilder()
@@ -72,11 +73,13 @@ async def robbery_start(message: Message):
             crew="",
         ).pack(),
     )
-    await message.answer(text, reply_markup=keyboard.adjust(3, 1).as_markup())
+    idx+=1
+    await message.answer(text, reply_markup=keyboard.adjust(*items_on_page(idx)).as_markup())
 
 
 @robbery_router.callback_query(RobberyCallback.filter())
 async def robbery_handler(callback: CallbackQuery, callback_data: RobberyCallback):
+    print(callback_data)
     if callback.from_user.id != callback_data.user_id:
         await callback.answer(TEXTS["errors"]["not_your_game"], show_alert=True)
         return
@@ -118,7 +121,7 @@ async def robbery_handler(callback: CallbackQuery, callback_data: RobberyCallbac
                 crew=new_crew,
             ).pack(),
         )
-        await callback.message.edit_text(text, reply_markup=keyboard.adjust(max(len(available_members), 1), 1).as_markup())
+        await callback.message.edit_text(text, reply_markup=keyboard.adjust(*items_on_page(len(available_members))).as_markup())
     elif callback_data.action == "start":
         success_chance, multiplier = calculate_robbery_chance(callback_data.crew)
         print(success_chance, multiplier)

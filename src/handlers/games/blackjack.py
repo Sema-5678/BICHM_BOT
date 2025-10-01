@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from config import BLACKJACK_BET
+from config import BLACKJACK_BET, BLACKJACK_PAYOUT_X
 from filters.chat_types import ChatTypeFilter
 from handlers.components.functions import (
     add_money,
@@ -155,11 +155,11 @@ async def blackjack_handler(callback: CallbackQuery, callback_data: BlackjackCal
             result = TEXTS["games"]["common"]["lose_bust"]
             new_balance = get_user_balance(user_id)
         elif dealer_score > 21:
-            win_amount = bet * 2
+            win_amount = bet * BLACKJACK_PAYOUT_X
             new_balance = add_money(user_id, win_amount)
             result = f"{TEXTS['games']['common']['dealer_busted_prefix']} {TEXTS['labels']['win_amount'].format(amount=format_money(win_amount))}"
         elif player_score > dealer_score:
-            win_amount = bet * 2
+            win_amount = bet * BLACKJACK_PAYOUT_X   
             new_balance = add_money(user_id, win_amount)
             result = TEXTS["labels"]["win_amount"].format(amount=format_money(win_amount))
         elif player_score < dealer_score:

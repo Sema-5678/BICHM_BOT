@@ -73,10 +73,17 @@ WIN_ALGORITHM = "balance"  # options: "legacy" | "balance"
 BASE_ROBBERY_CHANCE = 0.46
 BASE_ROBBERY_PAYOUT = 2.2
 ROBBERY_CHANCES = [
-    {"chance": 0.02, "cost_percentage": 0.14, "name": "Взломщик"},
-    {"chance": 0.01, "cost_percentage": 0.07, "name": "Водила"},
-    {"chance": 0.01, "cost_percentage": 0.07, "name": "Смотрящий"},
+    {"chance": 0.02, "cost_percentage": 0.09, "name": "Взломщик"},
+    {"chance": 0.20, "cost_percentage": 0.6, "name": "Водила"},
+    {"chance": 0.01, "cost_percentage": 0.05, "name": "Смотрящий"},
+    {"chance": -0.20, "cost_percentage": -0.5, "name": "Подрывник"},
+    {"chance": 0.40, "cost_percentage": 1.1, "name": "Работник банка"},
+
+
 ]
+ROBBERY_ITEMS_PER_ROW = 3
+
+BLACKJACK_PAYOUT_X = 3
 
 # ===== /getbc settings =====
 GET_BC_TIME_LIMIT = 4 * 60 * 60  # 4 часа в секундах
