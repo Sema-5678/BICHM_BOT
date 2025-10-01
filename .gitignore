@@ -1,0 +1,8 @@
+.pulintrc
+__pycache__/
+
+.vscode
+venv/
+
+.env
+data/*
