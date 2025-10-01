@@ -18,12 +18,25 @@ from common.bot_cmds_list import private, group
 from utils.logging_setup import setup_logging
 
 
-# ALLOWED_UPDATES = ['message', 'edited_message', 'callback_query']
 
-# Определяем, нужно ли включать логирование в Telegram
+from aiogram.client.session.aiohttp import AiohttpSession
+
+
 ENABLE_TELEGRAM_LOGGING = os.getenv('ENABLE_TELEGRAM_LOGGING', 'False').lower()
 
-bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+
+
+try:
+    session = AiohttpSession(proxy='http://proxy.server:3128')
+    bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML), session=session)
+except:
+    bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+
+
+
+# ALLOWED_UPDATES = ['message', 'edited_message', 'callback_query']
+
+
 bot.my_admins_list = []
 
 # Настраиваем логирование

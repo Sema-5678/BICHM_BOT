@@ -73,9 +73,9 @@ WIN_ALGORITHM = "balance"  # options: "legacy" | "balance"
 BASE_ROBBERY_CHANCE = 0.46
 BASE_ROBBERY_PAYOUT = 2.2
 ROBBERY_CHANCES = [
-    {"chance": 2, "cost_percentage": 0.14, "name": "Взломщик"},
-    {"chance": 1, "cost_percentage": 0.07, "name": "Водила"},
-    {"chance": 1, "cost_percentage": 0.07, "name": "Смотрящий"},
+    {"chance": 0.02, "cost_percentage": 0.14, "name": "Взломщик"},
+    {"chance": 0.01, "cost_percentage": 0.07, "name": "Водила"},
+    {"chance": 0.01, "cost_percentage": 0.07, "name": "Смотрящий"},
 ]
 
 # ===== /getbc settings =====

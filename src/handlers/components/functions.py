@@ -256,7 +256,7 @@ def add_amateur_card_to_hand(hand_str):
 
 
 def calculate_robbery_chance(crew_str):
-    chance = int(BASE_ROBBERY_CHANCE)
+    chance = BASE_ROBBERY_CHANCE
     cost_percentage = 0
     if crew_str:
         crew_ids = crew_str.split(",")
@@ -268,6 +268,7 @@ def calculate_robbery_chance(crew_str):
 
     final_chance = chance
     final_multiplier = BASE_ROBBERY_PAYOUT - cost_percentage
+    # print(final_chance, final_multiplier)
     return final_chance, final_multiplier
 
 

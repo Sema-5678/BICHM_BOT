@@ -12,6 +12,7 @@ from handlers.components.functions import (
     add_crew_member,
     add_money,
     calculate_robbery_chance,
+    check_is_valid_num,
     format_money,
     format_small_number,
     get_crew_display,
@@ -37,6 +38,8 @@ async def robbery_start(message: Message):
         return
     if not can_afford(message.from_user.id, bet):
         await message.answer(TEXTS["errors"]["insufficient_bc_heist"])
+        return
+    if not await check_is_valid_num(message, bet):
         return
     old_balance = get_user_balance(message.from_user.id)
     new_balance = deduct_money(message.from_user.id, bet)
@@ -84,7 +87,7 @@ async def robbery_handler(callback: CallbackQuery, callback_data: RobberyCallbac
         text = TEXTS["games"]["robbery"]["with_team"].format(
             bet=format_money(bet_amount),
             crew=get_crew_display(new_crew),
-            chance=success_chance,
+            chance=f"{success_chance*100:.2f}",
             multiplier=f"{multiplier:.2f}",
             count=len(new_crew.split(',')) if new_crew else 0,
         )

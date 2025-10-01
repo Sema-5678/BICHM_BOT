@@ -11,6 +11,7 @@ from filters.chat_types import ChatTypeFilter
 from handlers.components.functions import (
     add_money,
     can_afford,
+    check_is_valid_num,
     compute_adjusted_win_probability,
     deduct_money,
     format_money,
@@ -32,8 +33,10 @@ async def casino_start(message: Message):
     except:
         await message.answer(TEXTS["errors"]["use_syntax_casino"])
         return
-    if not is_valid_bet(bet):
-        await message.answer(TEXTS["errors"]["bet_range"].format(min_val=Decimal('0.01'), max_val=format_money(bet)))
+    # if not is_valid_bet(bet):
+    #     await message.answer(TEXTS["errors"]["bet_range"].format(min_val=Decimal('0.01'), max_val=format_money(bet)))
+    #     return
+    if not await check_is_valid_num(message, bet):
         return
     user_id = message.from_user.id
     if not can_afford(user_id, bet):
