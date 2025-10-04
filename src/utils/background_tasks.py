@@ -26,7 +26,7 @@ async def process_interest():
                 # Догоним пропущенные дни
                 while last_date < today:
 
-                    if user_data['max_loan'] > Decimal('0'):
+                    if user_data['debt'] > Decimal('0'):
                         user_data['debt'] += user_data['max_loan'] * (INTEREST_CREDIT_RATE_day)
                         user_data['credit_rating'] = max(0, user_data['credit_rating'] - CREDIT_RATING_DECREASE_PER_DAY)
                     user_data['max_loan'] = user_data['debt']
