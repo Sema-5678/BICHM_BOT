@@ -79,7 +79,7 @@ async def robbery_start(message: Message):
 
 @robbery_router.callback_query(RobberyCallback.filter())
 async def robbery_handler(callback: CallbackQuery, callback_data: RobberyCallback):
-    print(callback_data)
+    # print(callback_data)
     if callback.from_user.id != callback_data.user_id:
         await callback.answer(TEXTS["errors"]["not_your_game"], show_alert=True)
         return

@@ -26,3 +26,13 @@ class RobberyCallback(CallbackData, prefix="r"):  # было "rob" → стал�
     member_id: str | None = None
     bet: str
     crew: str = ""
+
+# Крестики-нолики: максимально короткий колбэк
+class TTTCallback(CallbackData, prefix="t"):
+    # player1_id, player2_id — id игроков; state — новое/текущее поле (9 символов)
+    # action — действие; bet — ставка.
+    player1_id: int
+    player2_id: int
+    state: str
+    action: str
+    bet: str

@@ -30,16 +30,16 @@ def items_on_page(idx):
     # print((*(ITEMS_PER_ROW,)*((idx)//ITEMS_PER_ROW), idx%ITEMS_PER_ROW, 1))
     return  (*(ROBBERY_ITEMS_PER_ROW,)*((idx)//ROBBERY_ITEMS_PER_ROW), ROBBERY_ITEMS_PER_ROW)
 
-def is_valid_num(amount):
+def is_valid_num(amount, max=MAX_BET, min=MIN_POSITIVE_NUM):
     """Проверяет, что число валидно"""
     if isinstance(amount, (int, float)):
         amount = Decimal(str(amount))
-    return MIN_POSITIVE_NUM <= amount <= MAX_BALANCE
+    return min <= amount <= max
 
 
-async def check_is_valid_num(msg, amount):
-    if not is_valid_num(amount):
-        await msg.answer(TEXTS["errors"]["invalid_number"])
+async def check_is_valid_num(msg, amount, max=MAX_BET, min=MIN_POSITIVE_NUM):
+    if not is_valid_num(amount, max=max, min=min):
+        await msg.answer(TEXTS["errors"]["invalid_number"].format(max=max, min=min))
         return False
     return True
 
