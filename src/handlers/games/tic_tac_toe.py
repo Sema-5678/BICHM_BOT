@@ -201,6 +201,7 @@ async def ttt_handler(callback: CallbackQuery, callback_data: TTTCallback):
                 win_amount = bet * Decimal('2.01')
                 add_money(winner_id, win_amount)
                 mark_label = w
+                print(mark_label)
                 winner_name = await _resolve_name(winner_id, callback.message)
                 # Балансы и дельты после выплаты
                 p1_balance = get_user_balance(p1)
@@ -211,11 +212,17 @@ async def ttt_handler(callback: CallbackQuery, callback_data: TTTCallback):
                     return ("+" + format_money(x)) if x > 0 else ("-" + format_money(-x) if x < 0 else format_money(0))
                 p1_name = await _resolve_name(p1, callback.message)
                 p2_name = await _resolve_name(p2, callback.message)
+
+                next_turn = 'O' if w == 'X' else 'X'
+
                 result_text = (
                     TEXTS["games"]["tictactoe"]["win"].format(mark=mark_label, name=winner_name)
                     + "\n\n"
-                    + f"X {p1_name}: {format_money(p1_balance)} ({fmt_delta(winner_delta if winner_id==p1 else loser_delta)})\n"
-                    + f"O {p2_name}: {format_money(p2_balance)} ({fmt_delta(winner_delta if winner_id==p2 else loser_delta)})"
+                    # + f"X {p1_name}: {format_money(p1_balance)} ({fmt_delta(winner_delta if winner_id==p1 else loser_delta)})\n"
+                    # + f"O {p2_name}: {format_money(p2_balance)} ({fmt_delta(winner_delta if winner_id==p2 else loser_delta)})"
+                    + f"{w} {p1_name}: {format_money(p1_balance)} ({fmt_delta(winner_delta)})\n"
+                    + f"{next_turn} {p2_name}: {format_money(p2_balance)} ({fmt_delta(loser_delta)})\n"
+
                 )
             else:
                 # Ничья → вернуть ставки

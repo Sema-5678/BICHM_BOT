@@ -472,11 +472,12 @@ def get_winning_chance(balance: Decimal) -> float:
 
 
 def win_chance(x: float) -> float:
+    x = float(x)
     if x>1000:
         return 52
     if x < 0.01:
         return 68
-    return -0.01800018 * x + 68.00018
+    return -0.016 * x + 68
 
 
 def compute_adjusted_win_probability(user_id: int, base_probability: float) -> float:
@@ -490,10 +491,10 @@ def compute_adjusted_win_probability(user_id: int, base_probability: float) -> f
     all_balance = user_data["balance"] + user_data["deposit"]
     user_chance_percent = win_chance(all_balance)  # 0..100
     # Neutral point is 50%. Above 50 increases odds, below decreases
-    factor = user_chance_percent / 50.0
+    factor = user_chance_percent / 50
     adjusted = base_probability * factor
-    if adjusted < 0.01:
-        return 0.01
-    if adjusted > 0.99:
-        return 0.99
+    if adjusted < 0:
+        return 0
+    if adjusted > 1:
+        return 1
     return adjusted

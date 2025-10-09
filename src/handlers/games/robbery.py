@@ -124,10 +124,10 @@ async def robbery_handler(callback: CallbackQuery, callback_data: RobberyCallbac
         await callback.message.edit_text(text, reply_markup=keyboard.adjust(*items_on_page(len(available_members))).as_markup())
     elif callback_data.action == "start":
         success_chance, multiplier = calculate_robbery_chance(callback_data.crew)
-        print(success_chance, multiplier)
+        # print(success_chance, multiplier)
         # if WIN_ALGORITHM == "balance":
         final_percent = compute_adjusted_win_probability(callback_data.user_id, success_chance)
-        print(final_percent)
+        # print(final_percent)
 
         bet_amount = Decimal(callback_data.bet)
         if random.random() <= final_percent:

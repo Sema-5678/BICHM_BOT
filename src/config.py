@@ -83,7 +83,7 @@ ROBBERY_CHANCES = [
 ]
 ROBBERY_ITEMS_PER_ROW = 3
 
-BLACKJACK_PAYOUT_X = 3
+BLACKJACK_PAYOUT_X = Decimal("2.5")
 
 # ===== /getbc settings =====
 GET_BC_TIME_LIMIT = 4 * 60 * 60  # 4 часа в секундах
