@@ -42,11 +42,11 @@ TRANSFER_COMMISSION = 1.1
 
 # ===== Precision & serialization =====
 getcontext().prec = 15  # МАКС КОЛ-ВО ЧИСЕЛ В БОТЕ И JSON
-MIN_POSITIVE_NUM = Decimal("0.01")  # 3 знака после запятой
+MIN_POSITIVE_NUM = Decimal("0.01")  # 2 знака после запятой
 
 # ===== Feature toggles =====
 # Управление автодобавлением отсутствующих ключей в JSON пользователей
-FILL_MISSING_DEFAULTS = True
+FILL_MISSING_DEFAULTS = False
 
 # ===== Economy & limits =====
 # Максимальный баланс пользователя
@@ -121,3 +121,10 @@ EASTER_EGGS = [
     "🐝 Жужжащая пасхалка пролетела мимо.",
     "🎲 Ты бросил кубик и выпало... Пасхалка!",
 ]
+
+
+
+
+
+
+BC_PER_PUB = 5
