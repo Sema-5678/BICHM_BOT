@@ -474,25 +474,32 @@ def get_winning_chance(balance: Decimal) -> float:
 def win_chance(x: float) -> float:
     x = float(x)
     if x>1000:
-        return 52
+        return 51
     if x < 0.01:
         return 68
     return -0.016 * x + 68
 
 
-def compute_adjusted_win_probability(user_id: int, base_probability: float) -> float:
+def compute_adjusted_win_probability(user_id: int, chat_id,  base_probability: float) -> float:
     """
     Converts the balance-based chance into a multiplier around a neutral point (50%),
     then scales a game's base probability.
     - base_probability: base win probability of the game profile (e.g., 0.50 for x2, 0.25 for x4)
-    Returns probability in [0.01, 0.99]
+    Returns probability in [0, 1]
     """
+    chat_id = str(chat_id)
+    # main_chat_id = -1002988477375
+    chats_bonuses = {'-1002988477375': 1.02,}
+    chat_bonus = chats_bonuses.get(chat_id, 1)
+    # print(chat_bonus, chat_id, '-1002988477375'==str(chat_id))
+
+
     user_data = get_user_data(user_id)
     all_balance = user_data["balance"] + user_data["deposit"]
     user_chance_percent = win_chance(all_balance)  # 0..100
     # Neutral point is 50%. Above 50 increases odds, below decreases
     factor = user_chance_percent / 50
-    adjusted = base_probability * factor
+    adjusted = base_probability * factor * chat_bonus
     if adjusted < 0:
         return 0
     if adjusted > 1:

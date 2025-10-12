@@ -46,7 +46,7 @@ MIN_POSITIVE_NUM = Decimal("0.01")  # 2 знака после запятой
 
 # ===== Feature toggles =====
 # Управление автодобавлением отсутствующих ключей в JSON пользователей
-FILL_MISSING_DEFAULTS = False
+FILL_MISSING_DEFAULTS = True
 
 # ===== Economy & limits =====
 # Максимальный баланс пользователя
