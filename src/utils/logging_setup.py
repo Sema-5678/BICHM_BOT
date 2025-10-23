@@ -98,7 +98,7 @@ def setup_logging(bot: Bot = None, enable_telegram_logging: bool = False, SUPERG
         error_handler.setFormatter(formatter)
         logger.addHandler(error_handler)
 
-    return logger, error_handler
+    return logger
 
 
 

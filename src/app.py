@@ -20,20 +20,81 @@ from utils.logging_setup import setup_logging
 
 
 from aiogram.client.session.aiohttp import AiohttpSession
+# Ошибки Telegram API и сети
+from aiogram.exceptions import TelegramNetworkError, TelegramAPIError
+
+# Ошибки aiohttp (например, не удалось подключиться)
+from aiohttp import ClientConnectorError, ClientOSError
+
+# Ошибки socks-прокси
+from python_socks._errors import ProxyError
+
+# ENABLE_TELEGRAM_LOGGING = os.getenv('ENABLE_TELEGRAM_LOGGING').lower()
 
 
-ENABLE_TELEGRAM_LOGGING = os.getenv('ENABLE_TELEGRAM_LOGGING', 'False').lower()
+from aiogram.types import Message
+
+def patch_message_methods(
+    retries: int = 3,
+    base_delay: float = 1.0,
+    methods: tuple[str, ...] = (
+        "answer",
+        "reply",
+        "edit_text",
+        "edit_caption",
+        "edit_reply_markup",
+        "delete",
+        "forward",
+        "copy_to",
+        "send_copy",
+    ),
+):
+    """
+    Добавляет retry-логику ко всем основным методам Message.
+    """
+
+    def make_safe_method(func_name: str):
+        original_func = getattr(Message, func_name)
+
+        async def safe_wrapper(self: Message, *args, **kwargs):
+            delay = base_delay
+            for attempt in range(1, retries + 1):
+                try:
+                    return await original_func(self, *args, **kwargs)
+                except (ProxyError, ClientConnectorError, TelegramNetworkError, asyncio.TimeoutError) as e:
+                    logger.warning(
+                        f"[Retry {attempt}/{retries}] Ошибка при вызове Message.{func_name}: {e.__class__.__name__}: {e}"
+                    )
+                    if attempt == retries:
+                        logger.error(
+                            f"❌ Message.{func_name} окончательно не выполнен после {retries} попыток."
+                        )
+                        raise
+                    await asyncio.sleep(delay)
+                    delay *= 2  # экспоненциальная задержка
+
+        return safe_wrapper
+
+    for name in methods:
+        if hasattr(Message, name):
+            setattr(Message, name, make_safe_method(name))
+            logger.debug(f"✅ Переопределён метод Message.{name} с retry-логикой")
 
 
 
-try:
-    session = AiohttpSession(proxy='http://proxy.server:3128')
-    bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML), session=session)
-except:
-    bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 
 
+
+# try:
+#     session = AiohttpSession(proxy='http://proxy.server:3128')
+#     bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML), session=session)
+# except:
+#     bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+
+
+
+bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 # ALLOWED_UPDATES = ['message', 'edited_message', 'callback_query']
 
@@ -41,7 +102,8 @@ except:
 bot.my_admins_list = []
 
 # Настраиваем логирование
-logger, error_handler = setup_logging(bot, enable_telegram_logging=ENABLE_TELEGRAM_LOGGING)
+logger = setup_logging(bot, enable_telegram_logging=config.ENABLE_TELEGRAM_LOGGING)
+patch_message_methods()
 
 
 dp = Dispatcher()

@@ -471,13 +471,13 @@ def get_winning_chance(balance: Decimal) -> float:
     return max(0, min(100, value))
 
 
-def win_chance(x: float) -> float:
-    x = float(x)
-    if x>1000:
-        return 51
-    if x < 0.01:
-        return 68
-    return -0.016 * x + 68
+def win_chance(x: Decimal) -> Decimal:
+    # x = float(x)
+    if x>Decimal("1000"):
+        return Decimal("50.5")
+    if x < Decimal("0.01"):
+        return Decimal('68')
+    return Decimal("-0.016") * x + Decimal("68")
 
 
 def compute_adjusted_win_probability(user_id: int, chat_id,  base_probability: float) -> float:
@@ -489,7 +489,7 @@ def compute_adjusted_win_probability(user_id: int, chat_id,  base_probability: f
     """
     chat_id = str(chat_id)
     # main_chat_id = -1002988477375
-    chats_bonuses = {'-1002988477375': 1.02,}
+    chats_bonuses = {'-1002988477375': Decimal("1.01"), "5273608148": Decimal("1.005")}
     chat_bonus = chats_bonuses.get(chat_id, 1)
     # print(chat_bonus, chat_id, '-1002988477375'==str(chat_id))
 
@@ -498,7 +498,7 @@ def compute_adjusted_win_probability(user_id: int, chat_id,  base_probability: f
     all_balance = user_data["balance"] + user_data["deposit"]
     user_chance_percent = win_chance(all_balance)  # 0..100
     # Neutral point is 50%. Above 50 increases odds, below decreases
-    factor = user_chance_percent / 50
+    factor = user_chance_percent * Decimal("0.02")
     adjusted = base_probability * factor * chat_bonus
     if adjusted < 0:
         return 0

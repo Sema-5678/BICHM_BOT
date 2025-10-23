@@ -1,12 +1,13 @@
+import asyncio
 from decimal import Decimal
 import random
 
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from config import MAX_CASINO_ROUNDS, WIN_ALGORITHM
+from config import MAX_CASINO_ROUNDS, MINI_CASINO_BET, WIN_ALGORITHM
 from filters.chat_types import ChatTypeFilter
 from handlers.components.functions import (
     add_money,
@@ -44,12 +45,15 @@ async def casino_start(message: Message):
         return
     old_balance = get_user_balance(user_id)
     new_balance = deduct_money(user_id, bet)
-    base_p = 0.50
-    adjusted_p =  compute_adjusted_win_probability(user_id, message.chat.id, base_p)
+    base_p = Decimal("0.50")
+    adjusted_p = compute_adjusted_win_probability(user_id, message.chat.id, base_p)
+    print(adjusted_p)
     dealer_number = random.randint(1, 20)
     is_win = random.random() < adjusted_p
     if is_win:
-        player_number = random.randint(dealer_number, 20) if dealer_number < 20 else dealer_number
+        player_number = (
+            random.randint(dealer_number, 20) if dealer_number < 20 else dealer_number
+        )
         text = TEXTS["games"]["casino"]["win"].format(
             bet=format_money(bet),
             old_balance=format_money(old_balance),
@@ -60,15 +64,23 @@ async def casino_start(message: Message):
         keyboard = InlineKeyboardBuilder()
         keyboard.button(
             text=TEXTS["buttons"]["next"],
-            callback_data=CasinoCallback(user_id=user_id, action="continue", initial_bet=str(bet), round_num=2).pack(),
+            callback_data=CasinoCallback(
+                user_id=user_id, action="continue", initial_bet=str(bet), round_num=2
+            ).pack(),
         )
         keyboard.button(
-            text=TEXTS["buttons"]["take_win"].format(amount=format_money(bet * Decimal('2'))),
-            callback_data=CasinoCallback(user_id=user_id, action="take", initial_bet=str(bet), round_num=1).pack(),
+            text=TEXTS["buttons"]["take_win"].format(
+                amount=format_money(bet * Decimal("2"))
+            ),
+            callback_data=CasinoCallback(
+                user_id=user_id, action="take", initial_bet=str(bet), round_num=1
+            ).pack(),
         )
         await message.answer(text, reply_markup=keyboard.as_markup())
     else:
-        player_number = random.randint(1, dealer_number - 1) if dealer_number > 1 else dealer_number
+        player_number = (
+            random.randint(1, dealer_number - 1) if dealer_number > 1 else dealer_number
+        )
         text = TEXTS["games"]["casino"]["lose"].format(
             old_balance=format_money(old_balance),
             new_balance=format_money(new_balance),
@@ -90,17 +102,29 @@ async def casino_handler(callback: CallbackQuery, callback_data: CasinoCallback)
     if round_num > MAX_CASINO_ROUNDS:
         await callback.answer(TEXTS["errors"]["casino_round_limit"], show_alert=True)
         return
-    last_bet = initial_bet * (Decimal('2') ** (round_num - 1))
-    current_bet = last_bet * Decimal('2')
+    last_bet = initial_bet * (Decimal("2") ** (round_num - 1))
+    current_bet = last_bet * Decimal("2")
     if not validate_casino_bet(initial_bet, round_num):
         await callback.answer(TEXTS["errors"]["casino_bet_too_large"], show_alert=True)
         return
     if callback_data.action == "continue":
         base_p = 0.50
-        adjusted_p =  compute_adjusted_win_probability(user_id, callback.chat.id, base_p)
+        adjusted_p = compute_adjusted_win_probability(user_id, callback.chat.id, base_p)
         dealer_number = random.randint(1, 20)
         is_win = random.random() < adjusted_p
-        player_number = random.randint(dealer_number, 20) if is_win and dealer_number < 20 else dealer_number if is_win else random.randint(1, dealer_number - 1) if dealer_number > 1 else dealer_number
+        player_number = (
+            random.randint(dealer_number, 20)
+            if is_win and dealer_number < 20
+            else (
+                dealer_number
+                if is_win
+                else (
+                    random.randint(1, dealer_number - 1)
+                    if dealer_number > 1
+                    else dealer_number
+                )
+            )
+        )
         if is_win:
             next_round = round_num + 1
             text = TEXTS["games"]["casino"]["continue"].format(
@@ -112,11 +136,23 @@ async def casino_handler(callback: CallbackQuery, callback_data: CasinoCallback)
             keyboard = InlineKeyboardBuilder()
             keyboard.button(
                 text=TEXTS["buttons"]["next"],
-                callback_data=CasinoCallback(user_id=user_id, action="continue", initial_bet=str(initial_bet), round_num=next_round).pack(),
+                callback_data=CasinoCallback(
+                    user_id=user_id,
+                    action="continue",
+                    initial_bet=str(initial_bet),
+                    round_num=next_round,
+                ).pack(),
             )
             keyboard.button(
-                text=TEXTS["buttons"]["take_win"].format(amount=format_money(current_bet)),
-                callback_data=CasinoCallback(user_id=user_id, action="take", initial_bet=str(initial_bet), round_num=round_num).pack(),
+                text=TEXTS["buttons"]["take_win"].format(
+                    amount=format_money(current_bet)
+                ),
+                callback_data=CasinoCallback(
+                    user_id=user_id,
+                    action="take",
+                    initial_bet=str(initial_bet),
+                    round_num=round_num,
+                ).pack(),
             )
             await callback.message.edit_text(text, reply_markup=keyboard.as_markup())
         else:
@@ -130,8 +166,56 @@ async def casino_handler(callback: CallbackQuery, callback_data: CasinoCallback)
             await callback.message.edit_text(text)
     elif callback_data.action == "take":
         new_balance = add_money(user_id, current_bet)
-        text = TEXTS["games"]["casino"]["take"].format(amount=format_money(current_bet), balance=format_money(new_balance))
+        text = TEXTS["games"]["casino"]["take"].format(
+            amount=format_money(current_bet), balance=format_money(new_balance)
+        )
         await callback.message.edit_text(text)
     await callback.answer()
 
 
+casino_dice_dict = {
+    64: {
+        "text": "🎉 Джекпот 777 ⭐⭐⭐",
+        "prize": 25,
+        "combination": "777",
+    },
+    1: {
+        "text": "🎉 Джекпот BAR",
+        "prize": 12,
+        "combination": "BAR",
+    },
+    43: {
+        "text": "🎉 Джекпот 'Лимончик' 🍋🍋🍋",
+        "prize": 18,
+        "combination": "🍋🍋🍋",
+    },
+    22: {
+        "text": "🎉 Джекпот 🍒🍒🍒",
+        "prize": 15,
+        "combination": "🍒🍒🍒",
+    },
+}
+
+
+@casino_router.message(F.dice)
+async def handle_dice(message: Message):
+    await asyncio.sleep(2)
+    dice = message.dice  # объект aiogram.types.Dice
+    emoji = dice.emoji  # например, "🎰"
+    value = dice.value  # случайное значение (int)
+
+    # await message.answer(f"🎰 Выпало значение: {value}")
+    win = casino_dice_dict.get(
+        value,
+        {
+            "text": "Повезёт в следующий раз",
+            "prize": -1,
+            "combination": "None",
+        }
+    )
+    win_bet = win["prize"] * MINI_CASINO_BET
+    new_balance = add_money(message.from_user.id, win_bet)
+    prize_text = f"   + {win_bet}" if win["prize"] > 0 else f"   - {-win_bet}"
+
+    text = f'{win["text"]}{prize_text}\n💳 Баланс: {new_balance}'
+    await message.reply(text=text)
