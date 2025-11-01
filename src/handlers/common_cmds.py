@@ -6,6 +6,7 @@ from aiogram.types import Message
 from filters.chat_types import ChatTypeFilter
 from common.data_for_bot import TEXTS
 from handlers.bank_handlers import bank_router
+from handlers.shop_handlers import shop_router
 from handlers.components.functions import format_money
 from config import (
     TOP_RICH_COUNT,
@@ -24,6 +25,7 @@ common_router = Router()
 
 common_router.include_router(bank_router)
 common_router.include_router(games_router)
+common_router.include_router(shop_router)
 
 
 
@@ -32,9 +34,7 @@ async def cmd_help(message: Message):
     await message.answer(TEXTS["static"]["help_text"])
 
 
-@common_router.message(Command("shop"))
-async def cmd_shop(message: Message):
-    await message.answer(TEXTS["static"]["shop_text"])
+# Команда /shop теперь обрабатывается в shop_handlers.py
 
 
 @common_router.message(Command("games"))
