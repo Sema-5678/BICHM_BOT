@@ -45,9 +45,10 @@ async def casino_start(message: Message):
         return
     old_balance = get_user_balance(user_id)
     new_balance = deduct_money(user_id, bet)
+    
     base_p = Decimal("0.50")
     adjusted_p = compute_adjusted_win_probability(user_id, message.chat.id, base_p)
-    print(adjusted_p)
+    # print(adjusted_p)
     dealer_number = random.randint(1, 20)
     is_win = random.random() < adjusted_p
     if is_win:
@@ -108,7 +109,7 @@ async def casino_handler(callback: CallbackQuery, callback_data: CasinoCallback)
         await callback.answer(TEXTS["errors"]["casino_bet_too_large"], show_alert=True)
         return
     if callback_data.action == "continue":
-        base_p = 0.50
+        base_p = Decimal('0.50')
         adjusted_p = compute_adjusted_win_probability(user_id, callback.chat.id, base_p)
         dealer_number = random.randint(1, 20)
         is_win = random.random() < adjusted_p

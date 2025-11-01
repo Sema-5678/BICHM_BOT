@@ -8,6 +8,7 @@ from aiogram.types import BotCommand
 from dotenv import find_dotenv, load_dotenv
 
 from utils.background_tasks import interest_scheduler
+from utils.json_engine import get_admins_data, update_admins_data
 load_dotenv(find_dotenv())
 import config
 
@@ -115,6 +116,15 @@ async def on_startup(bot):
     """Функция, выполняемая при запуске бота"""
     logger.info("Бот запускается...")
     
+    # Загружаем список администраторов
+    try:
+        admins_data = get_admins_data()
+        bot.my_admins_list = admins_data.get("admins_ids", [])
+        logger.info(f"Загружено {len(bot.my_admins_list)} администраторов")
+    except Exception as e:
+        logger.error(f"Ошибка загрузки списка администраторов: {e}")
+        bot.my_admins_list = []
+    
     # Запускаем фоновые задачи
     await interest_scheduler.start()
     logger.info("Фоновые задачи запущены")
@@ -140,13 +150,14 @@ async def main():
     # from handlers.bank_handlers import bank_router
     # from handlers.user_group import user_group_router
     from handlers.common_cmds import common_router
+    from handlers.admin_private import admin_router
 
 
 
     # dp.include_router(user_private_router)
     # dp.include_router(games_router
     # dp.include_router(bank_router)
-    # dp.include_router(admin_router)
+    dp.include_router(admin_router)
     # dp.include_router(user_group_router)
     dp.include_router(common_router)
 

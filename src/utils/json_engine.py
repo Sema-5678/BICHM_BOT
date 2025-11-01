@@ -83,19 +83,34 @@ def update_user_data(user_id, data):
             if data_num > MAX_BALANCE:
                 data_num = Decimal(MAX_BALANCE)
 
-            
-            # Здесь мы изменяем существующий словарь data_to_save по ключу key.
-            # Сначала округляем значение Decimal до двух знаков после запятой и записываем обратно в data_to_save[key].
-            # Затем сразу же перезаписываем это значение строкой (str(data_num)), то есть результат округления не сохраняется.
-            # Это может быть ошибкой: если мы хотим сохранить именно округлённое значение, нужно преобразовывать в строку уже округлённый результат.
-            # Правильно будет так:
+       
             rounded = data_num.quantize(MIN_POSITIVE_NUM, rounding=ROUND_HALF_UP)
             data_to_save[key] = str(rounded)
-            # data_to_save[key] = data_num.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-            # data_to_save[key] = str(data_num)
-            # data_to_save[key] = str(data_num)
     
     update_file(filename, data_to_save)
+
+
+
+def get_admins_data():
+    filename = 'admins_data.json'
+    return get_data(filename, {"admins_ids": []})
+
+
+def update_admins_data(data):
+    filename = 'admins_data.json'
+    update_file(filename, data)
+
+
+def get_categories_data():
+    filename = 'categories.json'
+    return get_data(filename, {})
+
+
+def update_categories_data(data):
+    filename = 'categories.json'
+    update_file(filename, data)
+
+
 
 def get_all_users():
     """Возвращает данные всех пользователей"""

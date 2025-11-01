@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/pyright/main/docs/config.schema.json",
+  "typeCheckingMode": "off",
+  "pythonVersion": "3.11",
+
+  "reportMissingImports": "error",
+  "reportUndefinedVariable": "error",
+  "reportUnboundVariable": "error",
+  "reportInvalidStringEscapeSequence": "error",
+  "reportSyntaxError": "error",
+
+  "reportMissingModuleSource": "none",
+  "reportMissingTypeStubs": "none",
+  "reportInvalidTypeForm": "none",
+  "reportInvalidTypeVarUse": "none",
+  "reportGeneralTypeIssues": "none",
+  "reportOptionalSubscript": "none",
+  "reportOptionalMemberAccess": "none",
+  "reportOptionalCall": "none",
+  "reportOptionalIterable": "none",
+  "reportOptionalOperand": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownLambdaType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownParameterType": "none",
+  "reportPrivateImportUsage": "none",
+  "reportUnnecessaryIsInstance": "none",
+  "reportUntypedFunctionDecorator": "none",
+  "reportUntypedBaseClass": "none",
+
+  "exclude": [
+    "venv",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist"
+  ]
+}
