@@ -40,18 +40,20 @@ def get_user_data(user_id, data_key=None):
         "max_loan": "0.0",     # Максимальная сумма кредита, которую пользователь когда-либо брал
         "getbc_time": 0,       # Время последнего использования команды /getbc (Unix timestamp)
         "username": "",        # Telegram username пользователя
-        "date_create": 0,      # Дата создания пользователя (Unix timestamp)
-        "date_update": 0,   
-        "last_interest_date": "None"
+        "date_create": int(time.time()),      # Дата создания пользователя (Unix timestamp)
+        "date_update": int(time.time()),   
+        "last_interest_date": "None",
+        'inventory': {},
+        "minecraft_goods_count_season": {},
         # Убрали last_interest_update - он не используется
     }
     
     data = get_data(filename, default_data)
     
     # Если это новый пользователь (date_create = 0), устанавливаем текущее время
-    if data.get("date_create", 0) == 0:
-        data["date_create"] = int(time.time())
-        data["date_update"] = int(time.time())
+    # if data.get("date_create", 0) == 0:
+    #     data["date_create"] = int(time.time())
+    #     data["date_update"] = int(time.time())
     
     # Конвертируем строки в Decimal
     for key in ['balance', 'debt', 'deposit', 'min_deposit', 'max_loan']:
@@ -102,14 +104,25 @@ def update_admins_data(data):
 
 
 def get_categories_data():
-    filename = 'categories.json'
+    filename = 'minecraft_goods.json'
     return get_data(filename, {})
 
 
 def update_categories_data(data):
-    filename = 'categories.json'
+    filename = 'minecraft_goods.json'
     update_file(filename, data)
 
+
+
+
+def get_donat_goods_data():
+    filename = 'minecraft_donat_goods.json'
+    return get_data(filename, {})
+
+
+def update_donat_goods_data(data):
+    filename = 'minecraft_donat_goods.json'
+    update_file(filename, data)
 
 
 def get_all_users():

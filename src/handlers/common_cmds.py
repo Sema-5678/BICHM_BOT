@@ -1,12 +1,13 @@
 from decimal import Decimal
-from aiogram import Router
+from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import CallbackQuery, Message
 
 from filters.chat_types import ChatTypeFilter
 from common.data_for_bot import TEXTS
 from handlers.bank_handlers import bank_router
-from handlers.shop_handlers import shop_router
+# from handlers.shop_handlers import shop_router
+from handlers.components.decorators import protected_callback
 from handlers.components.functions import format_money
 from config import (
     TOP_RICH_COUNT,
@@ -18,6 +19,8 @@ from config import (
 )
 from handlers.components.functions import get_user_data, calculate_max_loan
 from handlers.games import games_router
+from handlers.shop import shop_router
+from kbds.inline import get_callback_btns
 
 
 common_router = Router()
@@ -34,7 +37,39 @@ async def cmd_help(message: Message):
     await message.answer(TEXTS["static"]["help_text"])
 
 
-# Команда /shop теперь обрабатывается в shop_handlers.py
+@common_router.message(Command("shop"))
+@common_router.callback_query(F.data == "shop")
+@protected_callback
+async def cmd_shop(event: Message | CallbackQuery):
+    """Обработчик команды /shop"""
+    if isinstance(event, Message):
+        await event.answer(
+            "🛒 <b>Магазин</b>\n\n"
+            "Выберите категорию товаров:",
+            reply_markup=get_callback_btns(
+                btns={
+                "🎮 Майнкрафт": "minecraft_shop"
+            },
+            sizes=(1,)
+        ),
+        parse_mode='HTML'
+        )
+    else:
+        await event.message.edit_text(
+            "🛒 <b>Магазин</b>\n\n"
+            "Выберите категорию товаров:",
+            reply_markup=get_callback_btns(
+                btns={
+                "🎮 Майнкрафт": "minecraft_shop"
+            },
+            sizes=(1,)
+        ),
+        parse_mode='HTML'
+    )
+
+# Include the minecraft shop router in the common router
+# (it will handle its own routing starting from the minecraft_shop callback)
+
 
 
 @common_router.message(Command("games"))

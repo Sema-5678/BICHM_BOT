@@ -36,3 +36,38 @@ class TTTCallback(CallbackData, prefix="t"):
     state: str
     action: str
     bet: str
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class ShopCallback(CallbackData, prefix="shop"):
+    user_id: int
+    action: str
+    shop_type: str
+    category_id: str
+    item_id: str
+    quantity: int
+
+
+
+
+
+class MinecraftShopCallback(CallbackData, prefix="mineshop"):
+    user_id: int | None = None
+    shop_type: str | None = None
+    action: str | None = None
+    category_id: str | None = None
+    item_id: str | None = None
+    quantity: int= 0

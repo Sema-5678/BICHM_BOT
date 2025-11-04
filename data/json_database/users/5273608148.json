@@ -1,0 +1,16 @@
+{
+  "balance": "60",
+  "debt": "0.0",
+  "deposit": "0.0",
+  "credit_rating": 100,
+  "min_deposit": "0.0",
+  "max_loan": "0.0",
+  "getbc_time": 0,
+  "username": "",
+  "date_create": 0,
+  "date_update": 0,
+  "last_interest_date": "None",
+  "inventory": {},
+  "minecraft_goods_count_season": {},
+  "minecraft_username": ""
+}

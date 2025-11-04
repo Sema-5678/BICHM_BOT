@@ -1,0 +1,375 @@
+{
+  "1": {
+    "name": "🛠️ Инструменты и оружие",
+    "elems": {
+      "1": {
+        "id": "1",
+        "minecraft_id": "diamond_sword",
+        "name": "Алмазный меч",
+        "emoji": "⚔️",
+        "description": "Мощное оружие ближнего боя из алмазов. Наносит большой урон и имеет высокую прочность.",
+        "base_price": 50,
+        "price_growth": 10,
+        "max_stack": 1,
+        "cat_name": "🛠️ Инструменты и оружие"
+      },
+      "2": {
+        "id": "2",
+        "minecraft_id": "diamond_pickaxe",
+        "name": "Алмазная кирка",
+        "emoji": "⛏️",
+        "description": "Быстрая кирка для добычи руд. Идеальна для копания алмазов и других ценных ресурсов.",
+        "base_price": 40,
+        "price_growth": 10,
+        "max_stack": 1,
+        "cat_name": "🛠️ Инструменты и оружие"
+      },
+      "3": {
+        "id": "3",
+        "minecraft_id": "diamond_axe",
+        "name": "Алмазный топор",
+        "emoji": "🪓",
+        "description": "Эффективный топор для рубки деревьев. Быстро ломает древесину и листья.",
+        "base_price": 35,
+        "price_growth": 10,
+        "max_stack": 1,
+        "cat_name": "🛠️ Инструменты и оружие"
+      },
+      "4": {
+        "id": "4",
+        "minecraft_id": "bow",
+        "name": "Лук",
+        "emoji": "🏹",
+        "description": "Дальнобойное оружие для стрельбы стрелами. Требует стрелы для использования.",
+        "base_price": 20,
+        "price_growth": 9.0,
+        "max_stack": 1,
+        "cat_name": "🛠️ Инструменты и оружие"
+      },
+      "5": {
+        "id": "5",
+        "minecraft_id": "crossbow",
+        "name": "Арбалет",
+        "emoji": "🏹",
+        "description": "Мощное дальнобойное оружие. Может заряжаться стрелами и огненными зарядами.",
+        "base_price": 30,
+        "price_growth": 8,
+        "max_stack": 1,
+        "cat_name": "🛠️ Инструменты и оружие"
+      },
+      "6": {
+        "id": "6",
+        "minecraft_id": "trident",
+        "name": "Трезубец",
+        "emoji": "🔱",
+        "description": "Морское оружие, которое можно метать. Особенно эффективно в воде.",
+        "base_price": 45,
+        "price_growth": 12,
+        "max_stack": 1,
+        "cat_name": "🛠️ Инструменты и оружие"
+      }
+    }
+  },
+  "2": {
+    "name": "🛡️ Броня",
+    "elems": {
+      "7": {
+        "id": "7",
+        "minecraft_id": "diamond_helmet",
+        "name": "Алмазный шлем",
+        "emoji": "⛑️",
+        "description": "Прочная защита головы из алмазов. Дает высокую защиту и прочность.",
+        "base_price": 30,
+        "price_growth": 10,
+        "max_stack": 1,
+        "cat_name": "🛡️ Броня"
+      },
+      "8": {
+        "id": "8",
+        "minecraft_id": "diamond_chestplate",
+        "name": "Алмазный нагрудник",
+        "emoji": "🦺",
+        "description": "Основная защита туловища из алмазов. Самая важная часть брони.",
+        "base_price": 50,
+        "price_growth": 10,
+        "max_stack": 1,
+        "cat_name": "🛡️ Броня"
+      },
+      "9": {
+        "id": "9",
+        "minecraft_id": "diamond_leggings",
+        "name": "Алмазные поножи",
+        "emoji": "👖",
+        "description": "Защита ног из алмазов. Обеспечивает хорошую защиту нижней части тела.",
+        "base_price": 40,
+        "price_growth": 10,
+        "max_stack": 1,
+        "cat_name": "🛡️ Броня"
+      },
+      "10": {
+        "id": "10",
+        "minecraft_id": "diamond_boots",
+        "name": "Алмазные ботинки",
+        "emoji": "👢",
+        "description": "Прочная обувь из алмазов. Защищает ноги и дает стабильность.",
+        "base_price": 25,
+        "price_growth": 8,
+        "max_stack": 1,
+        "cat_name": "🛡️ Броня"
+      },
+      "11": {
+        "id": "11",
+        "minecraft_id": "elytra",
+        "name": "Элитры",
+        "emoji": "🦅",
+        "description": "Крылья для полета! Позволяют парить в воздухе и планировать на большие расстояния.",
+        "base_price": 100,
+        "price_growth": 20,
+        "max_stack": 1,
+        "cat_name": "🛡️ Броня"
+      }
+    }
+  },
+  "3": {
+    "name": "🍎 Еда",
+    "elems": {
+      "12": {
+        "id": "12",
+        "minecraft_id": "golden_apple",
+        "name": "Золотое яблоко",
+        "emoji": "🍎",
+        "description": "Питательное яблоко, восстанавливающее здоровье. Дает временные эффекты.",
+        "base_price": 15,
+        "price_growth": 3,
+        "max_stack": 64,
+        "cat_name": "🍎 Еда"
+      },
+      "13": {
+        "id": "13",
+        "minecraft_id": "enchanted_golden_apple",
+        "name": "Зачарованное золотое яблоко",
+        "emoji": "🍎",
+        "description": "Редкое и мощное яблоко. Дает сильные эффекты и восстанавливает много здоровья.",
+        "base_price": 50,
+        "price_growth": 15,
+        "max_stack": 1,
+        "cat_name": "🍎 Еда"
+      },
+      "14": {
+        "id": "14",
+        "minecraft_id": "golden_carrot",
+        "name": "Золотая морковь",
+        "emoji": "🥕",
+        "description": "Питательная морковь, восстанавливающая голод и дающая ночное зрение.",
+        "base_price": 8,
+        "price_growth": 2,
+        "max_stack": 64,
+        "cat_name": "🍎 Еда"
+      },
+      "15": {
+        "id": "15",
+        "minecraft_id": "cake",
+        "name": "Торт",
+        "emoji": "🎂",
+        "description": "Сладкий десерт, восстанавливающий голод. Можно есть несколько раз.",
+        "base_price": 12,
+        "price_growth": 3,
+        "max_stack": 1,
+        "cat_name": "🍎 Еда"
+      },
+      "16": {
+        "id": "16",
+        "minecraft_id": "pumpkin_pie",
+        "name": "Тыквенный пирог",
+        "emoji": "🥧",
+        "description": "Вкусный пирог из тыквы. Восстанавливает голод и дает уютное настроение.",
+        "base_price": 6,
+        "price_growth": 2,
+        "max_stack": 64,
+        "cat_name": "🍎 Еда"
+      }
+    }
+  },
+  "4": {
+    "name": "🧱 Строительные блоки",
+    "elems": {
+      "17": {
+        "id": "17",
+        "minecraft_id": "diamond_block",
+        "name": "Алмазный блок",
+        "emoji": "💎",
+        "description": "Дорогой строительный блок из алмазов. Используется для украшения и хранения.",
+        "base_price": 100,
+        "price_growth": 25,
+        "max_stack": 64,
+        "cat_name": "🧱 Строительные блоки"
+      },
+      "18": {
+        "id": "18",
+        "minecraft_id": "emerald_block",
+        "name": "Изумрудный блок",
+        "emoji": "💚",
+        "description": "Редкий блок из изумрудов. Красивый и ценный строительный материал.",
+        "base_price": 80,
+        "price_growth": 20,
+        "max_stack": 64,
+        "cat_name": "🧱 Строительные блоки"
+      },
+      "19": {
+        "id": "19",
+        "minecraft_id": "gold_block",
+        "name": "Золотой блок",
+        "emoji": "🟨",
+        "description": "Блок из золота. Используется для украшения и хранения золотых слитков.",
+        "base_price": 60,
+        "price_growth": 15,
+        "max_stack": 64,
+        "cat_name": "🧱 Строительные блоки"
+      },
+      "20": {
+        "id": "20",
+        "minecraft_id": "iron_block",
+        "name": "Железный блок",
+        "emoji": "⬜",
+        "description": "Прочный блок из железа. Хороший строительный материал и способ хранения железа.",
+        "base_price": 40,
+        "price_growth": 10,
+        "max_stack": 64,
+        "cat_name": "🧱 Строительные блоки"
+      },
+      "21": {
+        "id": "21",
+        "minecraft_id": "beacon",
+        "name": "Маяк",
+        "emoji": "🔮",
+        "description": "Мощная структура, дающая эффекты игрокам поблизости. Требует пирамиду из блоков.",
+        "base_price": 200,
+        "price_growth": 50,
+        "max_stack": 1,
+        "cat_name": "🧱 Строительные блоки"
+      }
+    }
+  },
+  "5": {
+    "name": "💎 Ресурсы",
+    "elems": {
+      "22": {
+        "id": "22",
+        "minecraft_id": "diamond",
+        "name": "Алмаз",
+        "emoji": "💎",
+        "description": "Редкий и ценный минерал. Используется для создания алмазных инструментов и брони.",
+        "base_price": 10,
+        "price_growth": 3,
+        "max_stack": 64,
+        "cat_name": "💎 Ресурсы"
+      },
+      "23": {
+        "id": "23",
+        "minecraft_id": "emerald",
+        "name": "Изумруд",
+        "emoji": "💚",
+        "description": "Редкий зеленый минерал. Валюта для торговли с жителями деревень.",
+        "base_price": 8,
+        "price_growth": 2,
+        "max_stack": 64,
+        "cat_name": "💎 Ресурсы"
+      },
+      "24": {
+        "id": "24",
+        "minecraft_id": "gold_ingot",
+        "name": "Золотой слиток",
+        "emoji": "🟨",
+        "description": "Слиток из золота. Используется для крафта золотых предметов и брони.",
+        "base_price": 6,
+        "price_growth": 2,
+        "max_stack": 64,
+        "cat_name": "💎 Ресурсы"
+      },
+      "25": {
+        "id": "25",
+        "minecraft_id": "iron_ingot",
+        "name": "Железный слиток",
+        "emoji": "⬜",
+        "description": "Слиток из железа. Основной материал для создания инструментов и брони.",
+        "base_price": 4,
+        "price_growth": 1.5,
+        "max_stack": 64,
+        "cat_name": "💎 Ресурсы"
+      },
+      "26": {
+        "id": "26",
+        "minecraft_id": "nether_star",
+        "name": "Звезда Нижнего мира",
+        "emoji": "⭐",
+        "description": "Редкий предмет, добываемый с ифрита. Необходим для создания маяка.",
+        "base_price": 150,
+        "price_growth": 40,
+        "max_stack": 64,
+        "cat_name": "💎 Ресурсы"
+      }
+    }
+  },
+  "6": {
+    "name": "🎒 Другое",
+    "elems": {
+      "28": {
+        "id": "28",
+        "minecraft_id": "blaze_rod",
+        "name": "Прут ифрита",
+        "emoji": "🔥",
+        "description": "Прут, добываемый с ифрита. Используется для создания зелий и маяка.",
+        "base_price": 8,
+        "price_growth": 2,
+        "max_stack": 64,
+        "cat_name": "🎒 Другое"
+      },
+      "29": {
+        "id": "29",
+        "minecraft_id": "ghast_tear",
+        "name": "Слеза гаста",
+        "emoji": "💧",
+        "description": "Редкая слеза, добываемая с гаста. Используется для создания зелий регенерации.",
+        "base_price": 10,
+        "price_growth": 3,
+        "max_stack": 64
+      },
+      "30": {
+        "id": "30",
+        "minecraft_id": "shulker_shell",
+        "name": "Ракушка шалкера",
+        "emoji": "🐚",
+        "description": "Ракушка, добываемая с шалкера. Используется для создания ящиков шалкера.",
+        "base_price": 25,
+        "price_growth": 8,
+        "max_stack": 64
+      },
+      "31": {
+        "id": "31",
+        "minecraft_id": "totem_of_undying",
+        "name": "Тотем бессмертия",
+        "emoji": "🛡️",
+        "description": "Мощный тотем, спасающий от смерти. Автоматически активируется при получении смертельного урона.",
+        "base_price": 300,
+        "price_growth": 100,
+        "max_stack": 1
+      }
+    }
+  },
+  "7": {
+    "name": "lk",
+    "elems": {
+      "1": {
+        "id": "1",
+        "name": "Алмазный меч",
+        "emoji": "⚔️",
+        "description": "Мощное оружие...",
+        "base_price": 50.0,
+        "price_growth": 10.0,
+        "max_stack": 1,
+        "minecraft_id": "diamond_sword",
+        "cat_name": "lk"
+      }
+    }
+  }
+}
