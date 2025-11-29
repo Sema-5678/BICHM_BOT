@@ -130,11 +130,7 @@
 from mcrcon import MCRcon
 
 # Настройки RCON
-RCON_HOST = "185.9.145.7"   # IP твоего сервера
-RCON_PORT = 25575          # порт RCON (из server.properties)
 
-RCON_PORT = 42385
-RCON_PASSWORD = "asr-d5211"
 
 # Имя игрока и предмет
 PLAYER_NAME = "Raven79rus"      # имя игрока на сервере

@@ -44,13 +44,21 @@ async def check_is_valid_num(msg, amount, max=MAX_BET, min=MIN_POSITIVE_NUM):
     return True
 
 
-def format_money(amount):
+def format_money(amount, currency=None):
+    if currency is None:
+        currency = "BC"
+    
+    elif currency == "rub":
+        currency = "₽"
+    
+    elif currency == "bc":
+        currency = "BC"
     """Форматирует денежную сумму с разделителями тысяч пробелами"""
     if isinstance(amount, (int, float)):
         amount = Decimal(str(amount))
 
     # Округляем до 2 знаков после запятой
-    amount_rounded = amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    amount_rounded = amount.quantize(MIN_POSITIVE_NUM, rounding=ROUND_HALF_UP)
 
     # Преобразуем в строку
     amount_str = f"{amount_rounded:.2f}"
@@ -68,7 +76,7 @@ def format_money(amount):
             formatted_integer = " " + formatted_integer
         formatted_integer = char + formatted_integer
 
-    return f"{formatted_integer}.{decimal_part} BC"
+    return f"{formatted_integer}.{decimal_part} {currency}"
 
 
 def format_small_number(num):

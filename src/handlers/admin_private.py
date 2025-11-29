@@ -42,8 +42,12 @@ def get_items_kb(category_id):
         return None
     
     buttons = {}
+
+    iter_obj = dict(
+            list(category['elems'].items())[-50 :]
+        )
     
-    for item_id, item_data in category['elems'][-50:].items():
+    for item_id, item_data in iter_obj.items():
         buttons[f"{item_data['emoji']} {item_data['name']}"] = f"item_{category_id}_{item_id}"
     
     buttons["➕ Добавить предмет"] = f"add_item_{category_id}"
@@ -64,7 +68,7 @@ def get_edit_item_kb(category_id, item_id):
     item = get_categories_data()[str(category_id)]['elems'][str(item_id)]
     buttons = {}
     
-    for field in ['name', 'emoji', 'description', 'base_price', 'price_growth', 'max_stack', 'minecraft_id']:
+    for field in ['name', 'emoji', 'description', 'base_price', 'price_growth', 'max_stack', 'currency', 'minecraft_id']:
         buttons[f"✏️ {field}"] = f"edit_field_{category_id}_{item_id}_{field}"
     
     buttons["🔙 Назад к предмету"] = f"item_{category_id}_{item_id}"
@@ -147,7 +151,7 @@ async def show_item(callback: types.CallbackQuery, state: FSMContext):
     text = (
         f"🔹 {item['name']} {item['emoji']}\n"
         f"📝 {item['description']}\n\n"
-        f"💵 Базовая цена: {item['base_price']}\n"
+        f"💵 Базовая цена: {item['base_price']} {item['currency']}\n"
         f"📈 Рост цены: {item['price_growth']}\n"
         f"📦 Макс. в стаке: {item['max_stack']}\n"
         f"🆔 Minecraft ID: {item.get('minecraft_id', 'Не указан')}"
@@ -203,6 +207,7 @@ async def add_item_start(callback: types.CallbackQuery, state: FSMContext):
         "Базовая цена\n"
         "Рост цены\n"
         "Макс. в стаке\n"
+        'За какую валюту кипить? bc или rub\n'
         "Minecraft ID\n\n"
         "Пример:\n"
         "Алмазный меч\n"
@@ -211,6 +216,7 @@ async def add_item_start(callback: types.CallbackQuery, state: FSMContext):
         "50\n"
         "10\n"
         "1\n"
+        'bc\n'
         "diamond_sword",
         reply_markup=get_callback_btns(
             # btns={"❌ Отмена": "cancel_action"},
@@ -236,6 +242,7 @@ async def add_item_finish(message: types.Message, state: FSMContext):
             "price_growth": float(data[4].strip()),
             "max_stack": int(data[5].strip()),
             "minecraft_id": data[6].strip(),
+            "currency": data[7].strip(),
             "cat_name": ""  # Will be set after
         }
         
@@ -264,7 +271,8 @@ async def add_item_finish(message: types.Message, state: FSMContext):
         )
         await state.clear()
         # await admin_panel(message, state)
-        await manage_items(message, state)
+        # await manage_items(message, state)
+        await admin_panel(message, state)
         
     except (ValueError, IndexError) as e:
         await message.answer(
@@ -310,7 +318,7 @@ async def edit_field_start(callback: types.CallbackQuery, state: FSMContext):
     
     await callback.message.edit_text(
         f"Текущее значение поля '{field}': {item.get(field, 'Не указано')}\n\n"
-        f"Введите новое значение:",
+        f"Введите новое значение: {'bc или rub' if field == 'currency' else ''}",
         reply_markup=get_callback_btns(
             btns={"❌ Отмена": f"edit_item_{category_id}_{item_id}"},
             sizes=(1,)
@@ -357,7 +365,7 @@ async def edit_field_finish(message: types.Message, state: FSMContext):
     text = (
         f"🔹 {item['name']} {item['emoji']}\n"
         f"📝 {item['description']}\n\n"
-        f"💵 Базовая цена: {item['base_price']}\n"
+        f"💵 Базовая цена: {item['base_price']} {item['currency']}\n"
         f"📈 Рост цены: {item['price_growth']}\n"
         f"📦 Макс. в стаке: {item['max_stack']}\n"
         f"🆔 Minecraft ID: {item.get('minecraft_id', 'Не указан')}"

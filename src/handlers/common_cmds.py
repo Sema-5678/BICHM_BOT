@@ -1,3 +1,4 @@
+# from cgitb import text
 from decimal import Decimal
 from aiogram import F, Router
 from aiogram.filters import Command
@@ -7,6 +8,8 @@ from filters.chat_types import ChatTypeFilter
 from common.data_for_bot import TEXTS
 from handlers.bank_handlers import bank_router
 # from handlers.shop_handlers import shop_router
+from handlers.common_funcs import send_msg_call
+from handlers.components.callbacks import ShopCallback
 from handlers.components.decorators import protected_callback
 from handlers.components.functions import format_money
 from config import (
@@ -20,6 +23,7 @@ from config import (
 from handlers.components.functions import get_user_data, calculate_max_loan
 from handlers.games import games_router
 from handlers.shop import shop_router
+from handlers.shop.minecraft.defs import create_shop_keyboard
 from kbds.inline import get_callback_btns
 
 
@@ -38,38 +42,20 @@ async def cmd_help(message: Message):
 
 
 @common_router.message(Command("shop"))
-@common_router.callback_query(F.data == "shop")
+@shop_router.callback_query(ShopCallback.filter(F.action == "show_shop"))
 @protected_callback
 async def cmd_shop(event: Message | CallbackQuery):
     """Обработчик команды /shop"""
-    if isinstance(event, Message):
-        await event.answer(
-            "🛒 <b>Магазин</b>\n\n"
-            "Выберите категорию товаров:",
-            reply_markup=get_callback_btns(
-                btns={
-                "🎮 Майнкрафт": "minecraft_shop"
-            },
-            sizes=(1,)
-        ),
-        parse_mode='HTML'
-        )
-    else:
-        await event.message.edit_text(
-            "🛒 <b>Магазин</b>\n\n"
-            "Выберите категорию товаров:",
-            reply_markup=get_callback_btns(
-                btns={
-                "🎮 Майнкрафт": "minecraft_shop"
-            },
-            sizes=(1,)
-        ),
-        parse_mode='HTML'
-    )
 
-# Include the minecraft shop router in the common router
-# (it will handle its own routing starting from the minecraft_shop callback)
+    keyboard = await create_shop_keyboard(event.from_user.id)
+    # text = ( "🛒 <b>Магазин</b>\n\n"
+    #         "Выберите категорию товаров:")
 
+    text = ('💵 S H O P 💵\n\n'
+            'Добро пожаловать в магазин бота! Здесь вы можете купить услуги и товары за ВС и РУБЛИ')
+
+    await send_msg_call(event, text=text, reply_markup=keyboard, parse_mode='HTML')
+   
 
 
 @common_router.message(Command("games"))

@@ -1,4 +1,5 @@
 import os
+
 from decimal import ROUND_HALF_UP, Decimal, getcontext
 
 # ===== Paths =====
@@ -87,8 +88,8 @@ BLACKJACK_PAYOUT_X = Decimal("2.5")
 
 # ===== /getbc settings =====
 GET_BC_TIME_LIMIT = 4 * 60 * 60  # 4 часа в секундах
-GET_BC_MIN_BC = 1  # Минимальное количество BC
-GET_BC_MAX_BC = 5  # Максимальное количество BC
+GET_BC_MIN_BC = 10  # Минимальное количество BC
+GET_BC_MAX_BC = 20  # Максимальное количество BC
 
 
 # ===== Easter eggs =====
@@ -127,7 +128,14 @@ EASTER_EGGS = [
 
 
 
-BC_PER_PUB = 5
+BC_PER_PUB = 10
 
 ENABLE_TELEGRAM_LOGGING = False
 MINI_CASINO_BET = 5
+
+
+
+class Config():
+    RCON_HOST = os.getenv("RCON_HOST")
+    RCON_PORT = os.getenv("RCON_PORT")
+    RCON_PASSWORD = os.getenv("RCON_PASSWORD")

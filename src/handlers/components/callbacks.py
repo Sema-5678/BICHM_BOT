@@ -53,12 +53,12 @@ class TTTCallback(CallbackData, prefix="t"):
 
 
 class ShopCallback(CallbackData, prefix="shop"):
-    user_id: int
-    action: str
-    shop_type: str
-    category_id: str
-    item_id: str
-    quantity: int
+    user_id: int | None = None
+    action: str | None = None
+    shop_type: str | None = None
+    category_id: str | None = None
+    item_id: str | None = None
+    quantity: int | None = None
 
 
 

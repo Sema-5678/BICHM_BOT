@@ -5,10 +5,12 @@ import time
 from config import MAX_BALANCE, START_BALANCE, MIN_POSITIVE_NUM, database_path, FILL_MISSING_DEFAULTS
 
 
+
+balance_list = ['balance', 'debt', 'deposit', 'min_deposit', 'max_loan', 'rub_balance']
 class DecimalEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Decimal):
-            rounded = obj.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            rounded = obj.quantize(MIN_POSITIVE_NUM, rounding=ROUND_HALF_UP)
             return str(rounded)
         return super().default(obj)
 
@@ -45,6 +47,7 @@ def get_user_data(user_id, data_key=None):
         "last_interest_date": "None",
         'inventory': {},
         "minecraft_goods_count_season": {},
+        "rub_balance": "0.0",
         # Убрали last_interest_update - он не используется
     }
     
@@ -56,7 +59,7 @@ def get_user_data(user_id, data_key=None):
     #     data["date_update"] = int(time.time())
     
     # Конвертируем строки в Decimal
-    for key in ['balance', 'debt', 'deposit', 'min_deposit', 'max_loan']:
+    for key in balance_list:
         if isinstance(data.get(key), str):
             data[key] = Decimal(data[key])
     
@@ -75,7 +78,7 @@ def update_user_data(user_id, data):
     data_to_save["date_update"] = int(time.time())
     
     # Округляем и конвертируем Decimal в строки
-    for key in ['balance', 'debt', 'deposit', 'min_deposit', 'max_loan']:
+    for key in balance_list:
         data_num = data_to_save.get(key)
         if isinstance(data_num, Decimal):
             if data_num < 0:
