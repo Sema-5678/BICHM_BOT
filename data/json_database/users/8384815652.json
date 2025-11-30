@@ -1,16 +1,16 @@
 {
-  "balance": "16.00",
+  "balance": "207656.51",
   "debt": "0.00",
-  "deposit": "0.00",
-  "credit_rating": 100,
-  "min_deposit": "0.00",
+  "deposit": "39129.91",
+  "credit_rating": 107,
+  "min_deposit": "39129.91",
   "max_loan": "0.00",
-  "getbc_time": 0,
-  "username": "",
-  "date_create": 1764505534,
-  "date_update": 1764511045,
-  "last_interest_date": "None",
+  "getbc_time": 1764516274,
+  "username": "Raven79rus",
+  "date_create": 1759082289,
+  "date_update": 1764526933,
+  "last_interest_date": "2025-11-30",
   "inventory": {},
   "minecraft_goods_count_season": {},
-  "rub_balance": "0.00"
+  "rub_balance": {}
 }

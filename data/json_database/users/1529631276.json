@@ -1,16 +1,16 @@
 {
-  "balance": "0.00",
-  "debt": "0.00",
-  "deposit": "0.00",
-  "credit_rating": 100,
-  "min_deposit": "0.00",
-  "max_loan": "0.00",
-  "getbc_time": 0,
-  "username": "",
-  "date_create": 1764505232,
-  "date_update": 1764521950,
-  "last_interest_date": "None",
+  "balance": "64.15",
+  "debt": "61.30",
+  "deposit": "48440.67",
+  "credit_rating": 83,
+  "min_deposit": "48440.67",
+  "max_loan": "61.30",
+  "getbc_time": 1764516297,
+  "username": "Ameba876",
+  "date_create": 1760792948,
+  "date_update": 1764526933,
+  "last_interest_date": "2025-11-30",
   "inventory": {},
   "minecraft_goods_count_season": {},
-  "rub_balance": "0.00"
+  "rub_balance": {}
 }
