@@ -1,14 +1,25 @@
 import asyncio
 from decimal import Decimal
+import os
 from utils.json_engine import get_all_users, update_user_data
-from config import  INTEREST_CREDIT_RATE_day, INTEREST_DEPOSIT_RATE_day, CREDIT_INTEREST_RATE_TIME, INTEREST_CREDIT_RATE, CREDIT_RATING_DECREASE_PER_DAY
+from config import (
+    INTEREST_CREDIT_RATE_day, 
+    INTEREST_DEPOSIT_RATE_day, 
+    CREDIT_INTEREST_RATE_TIME, 
+    INTEREST_CREDIT_RATE, 
+    CREDIT_RATING_DECREASE_PER_DAY,
+    chats_bonuses
+)
 import logging
+from aiogram import Bot
+from datetime import date
+from calendar import monthrange
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime, timedelta
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
-
 
 
 async def process_interest():
@@ -51,11 +62,140 @@ async def process_interest():
 
 
             
+# class InterestScheduler:
+#     def __init__(self, timezone: str = "Europe/Moscow", jobs: list = None):
+#         self.scheduler: AsyncIOScheduler | None = None
+#         self.timezone = timezone
+#         self.jobs = jobs
+
+#     async def start(self):
+#         if self.scheduler and self.scheduler.running:
+#             return  # уже запущен
+
+#         self.scheduler = AsyncIOScheduler(timezone=self.timezone)
+#         if self.jobs:
+#             for job in self.jobs:
+#                 self.scheduler.add_job(**job)
+#         else:
+#             logger.warning("Нет задач для запуска")
+#             return
+#         # self.scheduler.add_job(
+#         #     process_interest,
+#         #     "cron",
+#         #     hour=10,
+#         #     minute=0,
+#         # )
+#         self.scheduler.start()
+#         logger.info("✅ InterestScheduler запущен")
+
+#     async def stop(self):
+#         if self.scheduler and self.scheduler.running:
+#             self.scheduler.shutdown(wait=False)
+#             logger.info("⚠ InterestScheduler остановлен")
+
+            
+
+
+async def send_monthly_reset_notification(bot: Bot):
+    """Отправляет уведомление о скором обнулении баланса в чаты из списка chats_bonuses"""
+    try:
+        today = date.today()
+        _, last_day = monthrange(today.year, today.month)
+        days_until_reset = last_day - today.day
+        
+        message = None
+        
+        if days_until_reset == 5:  # 5 дней до конца месяца
+            message = (
+                "⚠️ *ВНИМАНИЕ!* ⚠️\n\n"
+                "До конца месяца осталось всего 5 дней!\n"
+                "В полночь 1-го числа все балансы игроков будут обнулены, а данные сезона Minecraft сброшены.\n\n"
+                "Успейте потратить свои средства до конца месяца!"
+            )
+        elif days_until_reset == 0:  # 1 день до конца месяца
+            message = (
+                "🔥 *ПОСЛЕДНИЙ ДЕНЬ МЕСЯЦА!* 🔥\n\n"
+                "До обнуления балансов осталось меньше суток!\n"
+                "В полночь все неиспользованные деньги сгорят, а данные сезона Minecraft будут сброшены.\n\n"
+                "Срочно тратьте все свои сбережения! Покупайте предметы, улучшения - всё, что угодно!\n"
+                "После полуночи эти деньги перестанут существовать! 💸"
+            )
+        
+        if message:
+            for chat_id in chats_bonuses.keys():
+                try:
+                    await bot.send_message(chat_id=chat_id, text=message, parse_mode='Markdown')
+                    logger.info(f"Отправлено уведомление о скором обнулении в чат {chat_id}")
+                except Exception as e:
+                    logger.error(f"Не удалось отправить уведомление в чат {chat_id}: {e}")
+        
+    except Exception as e:
+        logger.exception(f"Ошибка при отправке уведомлений о скором обнулении: {e}")
+
+
+async def reset_minecraft_season():
+    """Сбрасывает данные сезона Minecraft и баланс пользователей"""
+    logger.info("Сбрасываю данные сезона Minecraft и баланс для всех пользователей")
+    users = get_all_users()
+    
+    for user_id, user_data in users:
+        try:
+            # Сбрасываем данные сезона
+            if 'minecraft_goods_count_season' in user_data:
+                user_data['minecraft_goods_count_season'] = {}
+            
+            # Обнуляем баланс
+            user_data['balance'] = '0.00'
+            # user_data['rub_balance'] = '0.00'
+            
+            # Сохраняем изменения
+            update_user_data(user_id, user_data)
+            
+        except Exception as e:
+            logger.exception(f"Ошибка при сбросе данных сезона для пользователя {user_id}: {e}")
+            continue
+
+jobs = [
+    {
+        "func": process_interest,
+        "trigger": "cron",
+        "hour": CREDIT_INTEREST_RATE_TIME[0],
+        "minute": CREDIT_INTEREST_RATE_TIME[1],
+        "misfire_grace_time": 3600,
+        "max_instances": 1,
+        "coalesce": True,
+    },
+    {
+        "func": reset_minecraft_season,
+        "trigger": "cron",
+        "day": "last",  # Последний день месяца
+        "hour": 23,
+        "minute": 59,
+        "misfire_grace_time": 3600,
+        "max_instances": 1,
+        "coalesce": True,
+    },
+    {
+        "func": send_monthly_reset_notification,
+        "need_bot": True,
+        "trigger": "cron",
+        "hour": 12,  # В полдень
+        "misfire_grace_time": 3600,
+        "max_instances": 1,
+        "coalesce": True,
+    },
+]
+
+
+
 class InterestScheduler:
-    def __init__(self, timezone: str = "Europe/Moscow", jobs: list = None):
+    def __init__(self, timezone = "Europe/Moscow", jobs: list = None):
         self.scheduler: AsyncIOScheduler | None = None
         self.timezone = timezone
         self.jobs = jobs
+
+    async def add_bot(self, bot):
+        self.bot = bot
 
     async def start(self):
         if self.scheduler and self.scheduler.running:
@@ -64,16 +204,23 @@ class InterestScheduler:
         self.scheduler = AsyncIOScheduler(timezone=self.timezone)
         if self.jobs:
             for job in self.jobs:
+                need_bot = job.get("need_bot")
+                if need_bot:
+                    if not hasattr(self, "bot"):
+                        raise AttributeError(
+                            "бот не передан в Scheduler, но он нужен для работы"
+                        )
+                    else:
+                        del job["need_bot"]
+                        kwargs_list = job.get("kwargs", {})
+                        kwargs_list["bot"] = self.bot
+                        job["kwargs"] = kwargs_list
+
                 self.scheduler.add_job(**job)
         else:
             logger.warning("Нет задач для запуска")
             return
-        # self.scheduler.add_job(
-        #     process_interest,
-        #     "cron",
-        #     hour=10,
-        #     minute=0,
-        # )
+
         self.scheduler.start()
         logger.info("✅ InterestScheduler запущен")
 
@@ -82,14 +229,5 @@ class InterestScheduler:
             self.scheduler.shutdown(wait=False)
             logger.info("🛑 InterestScheduler остановлен")
 
-
-jobs = [
-    {
-        "func": process_interest,
-        "trigger": "cron",
-        "hour": CREDIT_INTEREST_RATE_TIME[0],
-        "minute": CREDIT_INTEREST_RATE_TIME[1],
-    }
-]
 
 interest_scheduler = InterestScheduler(jobs=jobs)

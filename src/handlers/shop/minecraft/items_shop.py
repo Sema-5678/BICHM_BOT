@@ -18,13 +18,17 @@ from handlers.common_funcs import send_msg_call
 from kbds.inline import get_callback_btns
 from handlers.shop.minecraft.defs import ShopStates, create_minecraft_shop_keyboard, get_item_key, calculate_item_price, get_user_inventory, minecraft_shop, update_user_inventory, clear_user_inventory, add_item_to_inventory, create_inventory_keyboard, create_item_details_keyboard, create_items_keyboard, create_categories_keyboard
 # Import the MinecraftShopCallback from callbacks
-from handlers.components.callbacks import  MinecraftShopCallback
+from handlers.components.callbacks import  MinecraftShopCallback, ShopCallback
 from handlers.components.decorators import  protected_callback
 from utils.json_engine import get_categories_data
 
 minecraft_items_shop_router = Router()
-minecraft_items_shop_router.callback_query(MinecraftShopCallback)
+# minecraft_items_shop_router.callback_query(ShopCallback.filter(F.shop_type == "0"))
+minecraft_items_shop_router.callback_query.filter(
+    MinecraftShopCallback.filter(F.shop_type == "items")
+)
 
+# minecraft_items_shop_router.callback_query(MinecraftShopCallback.filter(F.shop_type == "items"))
 
 
 
@@ -64,8 +68,10 @@ minecraft_items_shop_router.callback_query(MinecraftShopCallback)
 
 @minecraft_items_shop_router.callback_query(MinecraftShopCallback.filter(F.action == "show_categories"))
 # @minecraft_items_shop_router.callback_query(F.data == "minecraft_categories")
+@protected_callback
 async def show_minecraft_categories(callback: CallbackQuery, state: FSMContext, callback_data: MinecraftShopCallback = None):
     """Show all Minecraft item categories"""
+    print(callback_data)
     user_id = callback.from_user.id
     
     if callback_data:
@@ -105,7 +111,7 @@ async def show_category_items(callback: CallbackQuery, state: FSMContext, callba
         return
     
     await callback.message.edit_text(
-        f"📦 <b>{category['name']}</b>\n\n"
+        f"<b>{category['name']}</b>\n\n"
         f"Выберите предмет:",
         reply_markup=keyboard,
         parse_mode='HTML'
@@ -132,7 +138,7 @@ async def show_item_details(callback: CallbackQuery, state: FSMContext, callback
         return
     
     currency = item['currency']  # Теперь будет ошибка если ключа нет
-    currency_text = "🪙 BC" if currency == "bc" else "💵 Рубли"
+    currency_text = " BC" if currency == "bc" else "💵 Рубли"
     
     user_data = get_user_data(user_id)
     
@@ -164,10 +170,11 @@ async def show_item_details(callback: CallbackQuery, state: FSMContext, callback
             
             # Add purchase button for this quantity
             builder.button(
-                text=f"Купить {qty}",
+                text=f"+ {qty}",
                 callback_data=MinecraftShopCallback(
                     user_id=user_id,
                     action="purchase_item",
+                    shop_type="items",
                     category_id=category_id,
                     item_id=item_id,
                     quantity=qty
@@ -178,9 +185,10 @@ async def show_item_details(callback: CallbackQuery, state: FSMContext, callback
     
     # Add back button
     builder.button(
-        text="🔙 Назад",
+        text="⬅ Назад",
         callback_data=MinecraftShopCallback(
             user_id=user_id,
+            shop_type="items",
             action="show_category_items",
             category_id=category_id
         ).pack()
@@ -190,7 +198,7 @@ async def show_item_details(callback: CallbackQuery, state: FSMContext, callback
     
     # Build message text with balance info
     text_lines = [
-        f"🔹 <b>{item['name']} {item['emoji']}</b>",
+        f"{item['emoji']} <b>{item['name']}</b>",
         f"📝 {item['description']}",
         "",
         f"🌟 <b>Валюта покупки:</b> {currency_text}",

@@ -4,7 +4,7 @@ import aiomcrcon
 # from app import logger
 import logging
 
-from config import RCON_HOST, RCON_PASSWORD, RCON_PORT
+from config import Config
 logger = logging.getLogger(__name__)
 
 class RconManager:
@@ -43,6 +43,13 @@ class RconManager:
     # Методы для разных команд
     # ------------------------
 
+    async def do_command(self, command: str) -> str:
+        """
+        Выполняет команду на сервере.
+        """
+        res = await self._send(command)
+        return res
+
     async def give_item(self, player: str, item: str, amount: int) -> str:
         """
         Выдаёт предмет игроку.
@@ -69,8 +76,8 @@ class RconManager:
 
 
 rcon_manager = RconManager(
-        host=RCON_HOST,
-        port=RCON_PORT,
-        password=RCON_PASSWORD
+        host=Config.RCON_HOST,
+        port=Config.RCON_PORT,
+        password=Config.RCON_PASSWORD
     )
 

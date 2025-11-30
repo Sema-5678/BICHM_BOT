@@ -19,7 +19,7 @@ from handlers.components.functions import get_user_data, update_user_data, forma
 from kbds.inline import get_callback_btns
 
 # Import the ShopCallback from callbacks
-from handlers.components.callbacks import MinecraftShopCallback, ShopCallback
+from handlers.components.callbacks import CustomizationCallback, MinecraftShopCallback, ShopCallback
 from handlers.components.decorators import  protected_callback
 from utils.json_engine import get_categories_data
 from utils.rcon import rcon_manager
@@ -150,7 +150,7 @@ async def create_shop_keyboard(user_id: int, back_callback: str = None):
     
     if back_callback:
         builder.button(
-            text="🔙 Назад",
+            text="⬅ Назад",
             callback_data=back_callback
         )
     
@@ -168,35 +168,59 @@ async def create_minecraft_shop_keyboard(user_id: int, back_callback: str = None
     
     # Shop main menu buttons
     builder.button(
-        text="🛒 Предметы",
+        text="⚒️ Предметы",
         callback_data=MinecraftShopCallback(
             user_id=user_id,
             action="show_categories",
-            # shop_type="BC",
+            shop_type="items"
             # category_id="",
             # item_id="",
             # quantity=0
         ).pack()
     )
 
+    # builder.button(
+    #     text="🤡 Пранки",
+    #     callback_data=MinecraftShopCallback(
+    #         user_id=user_id,
+    #         action="show_pranks",
+    #         shop_type="pranks"
+    #         # category_id="",
+    #         # item_id="",
+    #         # quantity=0
+    #     ).pack()
+    # )
+    
     builder.button(
-        text="🤡 Пранки",
-        callback_data=MinecraftShopCallback(
+        text="🎨 Кастомизация",
+        callback_data=CustomizationCallback(
             user_id=user_id,
-            action="show_pranks",
-            # shop_type="BC",
+            action="show_customization",
+            # shop_type="customization"
             # category_id="",
             # item_id="",
             # quantity=0
         ).pack()
     )
+
     
     builder.button(
-        text="🎒 Мой инвентарь",
+        text="🎒 Инвентарь",
         callback_data=MinecraftShopCallback(
             user_id=user_id,
             action="show_inventory",
-            # shop_type=Т,
+            # shop_type="items"
+            # category_id="",
+            # item_id="",
+            # quantity=0
+        ).pack()
+    )
+    builder.button(
+        text="📝 Аккаунт майнкрафта",
+        callback_data=MinecraftShopCallback(
+            user_id=user_id,
+            action="change_nickname",
+            shop_type="items"
             # category_id="",
             # item_id="",
             # quantity=0
@@ -204,7 +228,7 @@ async def create_minecraft_shop_keyboard(user_id: int, back_callback: str = None
     )
 
     builder.button(
-        text="🔙 Назад",
+        text="⬅ Назад",
         callback_data=ShopCallback(
             user_id=user_id,
             action="show_shop",
@@ -226,7 +250,7 @@ async def create_minecraft_shop_keyboard(user_id: int, back_callback: str = None
     
     if back_callback:
         builder.button(
-            text="🔙 Назад",
+            text="⬅ Назад",
             callback_data=back_callback
         )
     
@@ -241,7 +265,7 @@ async def create_replenishment_keyboard(user_id: int):
     
 
     builder.button(
-        text="🔙 Назад",
+        text="⬅ Назад",
         callback_data=ShopCallback(
             user_id=user_id,
             action="show_shop",
@@ -284,7 +308,7 @@ async def create_inventory_keyboard(user_id: int):
         callback_data=MinecraftShopCallback(
             user_id=user_id,
             action="transfer_items",
-            
+            shop_type="items",
             category_id="",
             item_id="",
             quantity=0
@@ -329,7 +353,7 @@ async def create_item_details_keyboard(user_id: int, category_id: str, item_id: 
             callback_data=MinecraftShopCallback(
                 user_id=user_id,
                 action="purchase_item",
-                
+                shop_type="items",
                 category_id=category_id,
                 item_id=item_id,
                 quantity=quantity
@@ -338,11 +362,11 @@ async def create_item_details_keyboard(user_id: int, category_id: str, item_id: 
     
     # Back button
     builder.button(
-        text="🔙 Назад",
+        text="⬅ Назад",
         callback_data=MinecraftShopCallback(
             user_id=user_id,
             action="show_category_items",
-            
+            shop_type="items",
             category_id=category_id,
             item_id="",
             quantity=0
@@ -372,7 +396,7 @@ async def create_items_keyboard(user_id: int, category_id: str):
             callback_data=MinecraftShopCallback(
                 user_id=user_id,
                 action="show_item",
-                
+                shop_type="items",
                 category_id=category_id,
                 item_id=item_id,
                 quantity=0
@@ -381,11 +405,11 @@ async def create_items_keyboard(user_id: int, category_id: str):
     
     # Back button
     builder.button(
-        text="🔙 Назад",
+        text="⬅ Назад",
         callback_data=MinecraftShopCallback(
             user_id=user_id,
             action="show_categories",
-            
+            shop_type="items",
             category_id="",
             item_id="",
             quantity=0
@@ -409,7 +433,7 @@ async def create_categories_keyboard(user_id: int):
             callback_data=MinecraftShopCallback(
                 user_id=user_id,
                 action="show_category_items",
-                
+                shop_type="items",
                 category_id=cat_id,
                 item_id="",
                 quantity=0
@@ -418,11 +442,11 @@ async def create_categories_keyboard(user_id: int):
     
     # Back button
     builder.button(
-        text="🔙 Назад",
+        text="⬅ Назад",
         callback_data=MinecraftShopCallback(
             user_id=user_id,
             action="show_shop",
-            
+            shop_type="items",
             category_id="",
             item_id="",
             quantity=0

@@ -1,7 +1,7 @@
 # from cgitb import text
 from decimal import Decimal
 from aiogram import F, Router
-from aiogram.filters import Command
+from aiogram.filters import Command, or_f
 from aiogram.types import CallbackQuery, Message
 
 from filters.chat_types import ChatTypeFilter
@@ -36,7 +36,7 @@ common_router.include_router(shop_router)
 
 
 
-@common_router.message(Command("help"))
+@common_router.message(or_f(Command("help"), Command("start")))
 async def cmd_help(message: Message):
     await message.answer(TEXTS["static"]["help_text"])
 
@@ -74,6 +74,7 @@ async def cmd_bank(message: Message):
     max_loan = calculate_max_loan(user_data["credit_rating"])
     text = TEXTS["bank"]["info"].format(
         balance=format_money(user_data['balance']),
+        rubles=format_money(user_data['rub_balance'], 'rub'),
         debt=format_money(user_data['debt']),
         deposit=format_money(user_data['deposit']),
         credit_rating=user_data['credit_rating'],

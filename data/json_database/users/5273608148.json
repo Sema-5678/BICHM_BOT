@@ -1,25 +1,29 @@
 {
-  "balance": "1000000.00",
+  "balance": "609931.00",
   "debt": "0.00",
-  "deposit": "0.00",
+  "deposit": "10000.00",
   "credit_rating": 100,
   "min_deposit": "0.00",
   "max_loan": "0.00",
   "getbc_time": 0,
   "username": "",
   "date_create": 0,
-  "date_update": 1762678428,
-  "last_interest_date": "None",
-  "inventory": {},
+  "date_update": 1764522655,
+  "last_interest_date": "2025-11-29",
+  "inventory": {
+    "3_13": 1,
+    "1_1": 2
+  },
   "minecraft_goods_count_season": {
     "5_22": 2,
     "4_1": 131,
     "4_17": 1,
-    "3_12": 1,
+    "3_12": 4,
     "5_24": 2,
     "6_30": 1,
     "2_11": 1,
-    "3_13": 1
+    "3_13": 2,
+    "1_1": 2
   },
   "minecraft_username": "Raven_P79",
   "rub_balance": "900.00"

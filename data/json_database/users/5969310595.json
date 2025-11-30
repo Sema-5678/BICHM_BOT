@@ -1,0 +1,16 @@
+{
+  "balance": "2120.00",
+  "debt": "1000.00",
+  "deposit": "0.00",
+  "credit_rating": 98,
+  "min_deposit": "0.00",
+  "max_loan": "1000.00",
+  "getbc_time": 0,
+  "username": "",
+  "date_create": 1764511802,
+  "date_update": 1764511905,
+  "last_interest_date": "None",
+  "inventory": {},
+  "minecraft_goods_count_season": {},
+  "rub_balance": "0.00"
+}

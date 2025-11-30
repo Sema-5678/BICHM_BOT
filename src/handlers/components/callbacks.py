@@ -71,3 +71,11 @@ class MinecraftShopCallback(CallbackData, prefix="mineshop"):
     category_id: str | None = None
     item_id: str | None = None
     quantity: int= 0
+
+
+
+class CustomizationCallback(CallbackData, prefix="custom"):
+    user_id: int | None = None
+    action: str | None = None
+    custom_type: str | None = None
+    color: str | None = None

@@ -31,7 +31,7 @@ def get_categories_kb():
     
     buttons["➕ Добавить категорию"] = "add_category"
     buttons["❌ Удалить категорию"] = "delete_category"
-    buttons["🔙 Назад"] = "back_to_admin_menu"
+    buttons["⬅ Назад"] = "back_to_admin_menu"
     
     return get_callback_btns(btns=buttons, sizes=(1,))
 
@@ -51,8 +51,8 @@ def get_items_kb(category_id):
         buttons[f"{item_data['emoji']} {item_data['name']}"] = f"item_{category_id}_{item_id}"
     
     buttons["➕ Добавить предмет"] = f"add_item_{category_id}"
-    buttons["🔙 Назад к категориям"] = "manage_items"
-    buttons["🔙 Назад в меню"] = "back_to_admin_menu"
+    buttons["⬅ Назад к категориям"] = "manage_items"
+    buttons["⬅ Назад в меню"] = "back_to_admin_menu"
     
     return get_callback_btns(btns=buttons, sizes=(1,))
 
@@ -60,7 +60,7 @@ def get_item_actions_kb(category_id, item_id):
     buttons = {
         "✏️ Редактировать": f"edit_item_{category_id}_{item_id}",
         "❌ Удалить": f"delete_item_{category_id}_{item_id}",
-        "🔙 Назад к предметам": f"cat_{category_id}"
+        "⬅ Назад к предметам": f"cat_{category_id}"
     }
     return get_callback_btns(btns=buttons, sizes=(1,))
 
@@ -71,7 +71,7 @@ def get_edit_item_kb(category_id, item_id):
     for field in ['name', 'emoji', 'description', 'base_price', 'price_growth', 'max_stack', 'currency', 'minecraft_id']:
         buttons[f"✏️ {field}"] = f"edit_field_{category_id}_{item_id}_{field}"
     
-    buttons["🔙 Назад к предмету"] = f"item_{category_id}_{item_id}"
+    buttons["⬅ Назад к предмету"] = f"item_{category_id}_{item_id}"
     
     return get_callback_btns(btns=buttons, sizes=(1,))
 
@@ -397,7 +397,7 @@ async def delete_item(callback: types.CallbackQuery, state: FSMContext):
         reply_markup=get_callback_btns(
             btns={
                 "❌ Да, удалить": f"confirm_delete_item_{category_id}_{item_id}",
-                "🔙 Нет, отмена": f"item_{category_id}_{item_id}"
+                "⬅ Нет, отмена": f"item_{category_id}_{item_id}"
             },
             sizes=(2,)
         )
@@ -419,7 +419,7 @@ async def confirm_delete_item(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.edit_text(
         f"✅ Предмет '{item_name}' был удален.",
         reply_markup=get_callback_btns(
-            btns={"🔙 К предметам": f"cat_{category_id}"},
+            btns={"⬅ К предметам": f"cat_{category_id}"},
             sizes=(1,)
         )
     )
@@ -438,7 +438,7 @@ async def delete_category_start(callback: types.CallbackQuery, state: FSMContext
     for cat_id, cat_data in categories.items():
         buttons[f"❌ {cat_data['name']}"] = f"delete_cat_{cat_id}"
     
-    buttons["🔙 Назад"] = "manage_items"
+    buttons["⬅ Назад"] = "manage_items"
     
     await callback.message.edit_text(
         "Выберите категорию для удаления (все предметы в ней также будут удалены):",
@@ -463,7 +463,7 @@ async def delete_category_confirm(callback: types.CallbackQuery, state: FSMConte
         reply_markup=get_callback_btns(
             btns={
                 "❌ Да, удалить": f"confirm_delete_cat_{category_id}",
-                "🔙 Нет, отмена": "manage_items"
+                "⬅ Нет, отмена": "manage_items"
             },
             sizes=(2,)
         )
@@ -485,7 +485,7 @@ async def delete_category_finish(callback: types.CallbackQuery, state: FSMContex
     await callback.message.edit_text(
         f"✅ Категория '{category_name}' и все её предметы были удалены.",
         reply_markup=get_callback_btns(
-            btns={"🔙 К категориям": "manage_items"},
+            btns={"⬅ К категориям": "manage_items"},
             sizes=(1,)
         )
     )

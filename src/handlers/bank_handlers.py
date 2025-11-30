@@ -4,6 +4,7 @@ from aiogram.types import Message
 
 from config import (
     EASTER_EGGS,
+    MAX_DEPOSIT,
     MIN_CREDIT_RATING,
     TOP_RICH_COUNT,
     BLACKJACK_BET,
@@ -148,6 +149,13 @@ async def deposit_replenish_handler(message: Message):
     if user_data["balance"] < amount:
         await message.answer(TEXTS["errors"]["not_enough_balance"])
         return
+        
+    if user_data["deposit"] + amount > MAX_DEPOSIT:
+        # max_addition = MAX_DEPOSIT - user_data["deposit"]
+        # if max_addition <= 0:
+        await message.answer(TEXTS["errors"]["max_deposit_reached"].format(max=format_money(MAX_DEPOSIT)))
+        return
+        # amount = max_addition  # Автоматически уменьшаем сумму до максимально возможной
 
     # Пополняем вклад
     user_data["balance"] -= amount
@@ -239,6 +247,18 @@ async def transfer_money_handler(message: Message):
     if not message.reply_to_message:
         await message.answer(TEXTS["bank"]["transfer_reply_hint"])
         return
+    # Если сообщение в теме
+    if message.is_topic_message:
+        # Если Telegram «подставил» reply на первое сообщение темы
+        if message.reply_to_message.message_id == message.message_thread_id:
+            await message.answer(TEXTS["bank"]["transfer_reply_hint"])
+            return
+
+    # Если дошли сюда — это настоящий ответ на конкретное сообщение
+    # replied = msg.reply_to_message
+    # await msg.answer(
+    #     f"Нормальный reply. Ответил на сообщение ID {replied.message_id}"
+    # )
 
     try:
         parts = message.text.split()

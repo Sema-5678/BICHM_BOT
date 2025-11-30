@@ -17,6 +17,7 @@ from config import (
     ROBBERY_CHANCES,
     TOP_RICH_COUNT,
     MIN_POSITIVE_NUM,
+    chats_bonuses,
 )
 from utils.json_engine import get_user_data, update_user_data, database_path
 from common.data_for_bot import TEXTS
@@ -496,8 +497,9 @@ def compute_adjusted_win_probability(user_id: int, chat_id,  base_probability: f
     Returns probability in [0, 1]
     """
     chat_id = str(chat_id)
+
+    base_probability = Decimal(str(base_probability))
     # main_chat_id = -1002988477375
-    chats_bonuses = {'-1002988477375': Decimal("1.01"), "5273608148": Decimal("1.005")}
     chat_bonus = chats_bonuses.get(chat_id, 1)
     # print(chat_bonus, chat_id, '-1002988477375'==str(chat_id))
 

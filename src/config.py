@@ -52,10 +52,11 @@ FILL_MISSING_DEFAULTS = True
 # ===== Economy & limits =====
 # Максимальный баланс пользователя
 MAX_BALANCE = 1_000_000  # 1 миллион BC
-MAX_BET = 1_000
+MAX_BET = 100_000
 
 
-MAX_LOAN = 60
+MAX_LOAN = 1_000
+MAX_DEPOSIT = 10_000
 START_BALANCE = 60
 MIN_CREDIT_RATING = 10
 TOP_RICH_COUNT = 10
@@ -125,10 +126,11 @@ EASTER_EGGS = [
 
 
 
+chats_bonuses = {'-1002988477375': Decimal("1.01"), "5273608148": Decimal("1.005")}
 
 
 
-BC_PER_PUB = 10
+BC_PER_PUB = 50
 
 ENABLE_TELEGRAM_LOGGING = False
 MINI_CASINO_BET = 5

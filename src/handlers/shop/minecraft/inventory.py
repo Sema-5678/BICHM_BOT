@@ -98,24 +98,7 @@ async def transfer_items_to_game(callback: CallbackQuery, state: FSMContext):
     minecraft_username = user_data.get('minecraft_username')
     
     if not minecraft_username:
-        # Ask for Minecraft username if not set
-        await state.set_state(ShopStates.awaiting_minecraft_username)
-        await callback.message.edit_text(
-            "🔹 <b>Введите ваш ник в Minecraft:</b>",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(
-                    text="🔙 Назад",
-                    callback_data=MinecraftShopCallback(
-                        user_id=user_id,
-                        action="show_inventory",
-                        
-                        category_id="",
-                        item_id="",
-                        quantity=0
-                    ).pack()
-                )
-            ]])
-        )
+        await request_user_minecraft_username(callback, state)
         return
     
     inventory = get_user_inventory(user_id)
@@ -191,4 +174,55 @@ async def transfer_items_to_minecraft(message: Message, user_id: int, minecraft_
 
     else:
         await message.answer(f"❌ {err_text}")
+        user_data = get_user_data(user_id)
+        user_data['inventory'] = inventory
+        update_user_data(user_id, user_data)
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@minecraft_inventory_router.callback_query(MinecraftShopCallback.filter(F.action == "change_nickname"))
+async def request_user_minecraft_username_y(callback: CallbackQuery, state: FSMContext):
+            await callback.message.answer("Ник меняется через администрацию, пишите @Raven79rus")
+
+
+
+
+
+async def request_user_minecraft_username(callback: CallbackQuery, state: FSMContext):
+
+
+    # if isinstance(callback.data, dict) and callback.data.get("action") == "change_nickname":
+    #         await callback.answer("Ник меняется через администрацию, пишите @Raven79rus")
+    #         return
+    # else:
+ # Ask for Minecraft username if not set
+        await state.set_state(ShopStates.awaiting_minecraft_username)
+        await callback.message.edit_text(
+            "🔹 <b>Введите ваш ник в Minecraft:</b>",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                InlineKeyboardButton(
+                    text="⬅ Назад",
+                    callback_data=MinecraftShopCallback(
+                        user_id=callback.from_user.id,
+                        action="show_inventory",
+                        
+                        category_id="",
+                        item_id="",
+                        quantity=0
+                    ).pack()
+                )
+            ]])
+        )

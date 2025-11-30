@@ -126,6 +126,7 @@ async def on_startup(bot):
         bot.my_admins_list = []
     
     # Запускаем фоновые задачи
+    await interest_scheduler.add_bot(bot)
     await interest_scheduler.start()
     logger.info("Фоновые задачи запущены")
     

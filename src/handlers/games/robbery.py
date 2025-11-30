@@ -126,7 +126,7 @@ async def robbery_handler(callback: CallbackQuery, callback_data: RobberyCallbac
         success_chance, multiplier = calculate_robbery_chance(callback_data.crew)
         # print(success_chance, multiplier)
         # if WIN_ALGORITHM == "balance":
-        final_percent = compute_adjusted_win_probability(callback_data.user_id, callback.chat.id, success_chance)
+        final_percent = compute_adjusted_win_probability(callback_data.user_id, callback.message.chat.id, success_chance)
         # print(final_percent)
 
         bet_amount = Decimal(callback_data.bet)

@@ -8,8 +8,8 @@ from .tic_tac_toe import ttt_router
 
 
 games_router = Router()
-games_router.include_router(blackjack_router)
-games_router.include_router(amateur_blackjack_router)
+# games_router.include_router(blackjack_router)
+# games_router.include_router(amateur_blackjack_router)
 games_router.include_router(casino_router)
 games_router.include_router(robbery_router)
 games_router.include_router(ttt_router)
