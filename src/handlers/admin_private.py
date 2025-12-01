@@ -207,7 +207,7 @@ async def add_item_start(callback: types.CallbackQuery, state: FSMContext):
         "Базовая цена\n"
         "Рост цены\n"
         "Макс. в стаке\n"
-        'За какую валюту кипить? bc или rub\n'
+        'За какую валюту кипить? bc или rub (маленькими буквами)\n'
         "Minecraft ID\n\n"
         "Пример:\n"
         "Алмазный меч\n"
@@ -241,8 +241,8 @@ async def add_item_finish(message: types.Message, state: FSMContext):
             "base_price": float(data[3].strip()),
             "price_growth": float(data[4].strip()),
             "max_stack": int(data[5].strip()),
-            "minecraft_id": data[6].strip(),
-            "currency": data[7].strip(),
+            "currency": data[6].strip().lower(),
+            "minecraft_id": data[7].strip(),
             "cat_name": ""  # Will be set after
         }
         
@@ -318,7 +318,7 @@ async def edit_field_start(callback: types.CallbackQuery, state: FSMContext):
     
     await callback.message.edit_text(
         f"Текущее значение поля '{field}': {item.get(field, 'Не указано')}\n\n"
-        f"Введите новое значение: {'bc или rub' if field == 'currency' else ''}",
+        f"Введите новое значение: {'bc или rub (маленькими буквами)' if field == 'currency' else ''}",
         reply_markup=get_callback_btns(
             btns={"❌ Отмена": f"edit_item_{category_id}_{item_id}"},
             sizes=(1,)
