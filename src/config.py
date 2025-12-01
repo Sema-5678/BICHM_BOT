@@ -2,6 +2,8 @@ import os
 
 from decimal import ROUND_HALF_UP, Decimal, getcontext
 
+from dotenv import find_dotenv, load_dotenv
+load_dotenv(find_dotenv())
 # ===== Paths =====
 # Получаем путь на уровень выше директории, где находится этот файл
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
