@@ -22,6 +22,7 @@ from handlers.components.functions import (
 )
 from handlers.components.callbacks import CasinoCallback
 from common.data_for_bot import TEXTS
+from utils.json_engine import get_user_data
 
 
 casino_router = Router()
@@ -190,7 +191,7 @@ casino_dice_dict = {
     },
     1: {
         "text": "🎉 Джекпот BAR",
-        "prize": 12,
+        "prize": 8,
         "combination": "BAR",
     },
     43: {
@@ -208,6 +209,10 @@ casino_dice_dict = {
 
 @casino_router.message(F.dice)
 async def handle_dice(message: Message):
+    user_data = get_user_data(message.from_user.id)
+    if user_data['balance'] < MINI_CASINO_BET:
+        await message.answer('У вас недостаточно баланса')
+        return
     await asyncio.sleep(2.1)
     dice = message.dice  # объект aiogram.types.Dice
     emoji = dice.emoji  # например, "🎰"
