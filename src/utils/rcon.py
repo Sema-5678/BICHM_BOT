@@ -22,6 +22,7 @@ class RconManager:
         Подключается, выполняет команду и закрывает соединение.
         """
         try:
+            print(f"Подключаюсь к {self.host}:{self.port}")
             async with aiomcrcon.Client(
                 host=self.host,
                 port=self.port,
