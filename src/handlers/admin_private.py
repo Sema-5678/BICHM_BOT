@@ -2,10 +2,13 @@ from aiogram import F, Router, types, html
 from aiogram.filters import Command, StateFilter, or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+import os
+import json
+from pathlib import Path
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
 
 from filters.chat_types import ChatTypeFilter, IsAdmin
-from utils.json_engine import get_categories_data, update_categories_data
+from utils.json_engine import get_all_users, get_categories_data, get_user_data, update_categories_data, update_user_data
 from kbds.inline import get_callback_btns
 
 admin_router = Router()
@@ -20,6 +23,8 @@ class CategoryStates(StatesGroup):
     adding_item = State()
     deleting_category = State()
     deleting_item = State()
+    changing_minecraft_nickname = State()
+    entering_new_nickname = State()
 
 # Helper functions
 def get_categories_kb():
@@ -80,7 +85,8 @@ def get_admin_main_menu():
     buttons = {
         "🛠️ Управление предметами": "manage_items",
         "⚙️ Настройки бота": "bot_settings",
-        "📊 Статистика": "bot_stats"
+        "📊 Статистика": "bot_stats",
+        "🎮 Изменить никнейм Minecraft": "change_minecraft_nickname"
     }
     return get_callback_btns(btns=buttons, sizes=(1,))
 
@@ -95,12 +101,13 @@ async def admin_panel(message: types.Message, state: FSMContext):
 
 @admin_router.callback_query(F.data == "back_to_admin_menu")
 async def back_to_admin_menu(callback: types.CallbackQuery, state: FSMContext):
+    await state.clear()
     await callback.message.edit_text(
         "🔧 <b>Панель администратора</b>\n\nВыберите раздел:",
         reply_markup=get_admin_main_menu(),
         parse_mode='HTML'
     )
-    await state.clear()
+
 
 @admin_router.callback_query(F.data == "manage_items")
 async def manage_items(callback: types.CallbackQuery, state: FSMContext):
@@ -496,3 +503,130 @@ async def cancel_action(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.message.answer("Действие отменено.")
     await admin_panel(callback.message, state)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@admin_router.callback_query(F.data == "change_minecraft_nickname")
+async def change_minecraft_nickname_start(callback: types.CallbackQuery, state: FSMContext):
+    users =  get_all_users()
+    if len(users) == 0:
+        await callback.answer("❌ Нет зарегистрированных пользователей", show_alert=True)
+        return
+    
+    buttons = {}
+    for user_id, data in users:
+        display_name = f"@{data['username']}" if data.get('username') else f"Пользователь {user_id}"
+        buttons[display_name] = f"change_nick_user_{user_id}"
+    
+    buttons["⬅ Назад"] = "back_to_admin_menu"
+    
+    await callback.message.edit_text(
+        "👥 Выберите пользователя, чей никнейм нужно изменить:",
+        reply_markup=get_callback_btns(btns=buttons, sizes=(1,))
+    )
+    await state.set_state(CategoryStates.changing_minecraft_nickname)
+
+@admin_router.callback_query(F.data.startswith("change_nick_user_"), CategoryStates.changing_minecraft_nickname)
+async def select_user_for_nickname_change(callback: types.CallbackQuery, state: FSMContext):
+    user_id = callback.data.split('_')[-1]
+    await state.update_data(selected_user_id=user_id)
+    
+    await callback.message.edit_text(
+        f"✏️ Введите новый никнейм Minecraft для пользователя ID: {user_id}",
+        reply_markup=get_callback_btns(btns={"❌ Отмена": "back_to_admin_menu"})
+    )
+    await state.set_state(CategoryStates.entering_new_nickname)
+
+@admin_router.message(CategoryStates.entering_new_nickname)
+async def save_minecraft_nickname(message: types.Message, state: FSMContext):
+    new_nickname = message.text.strip()
+    if not new_nickname:
+        await message.answer("❌ Никнейм не может быть пустым. Попробуйте еще раз.")
+        return
+    
+    if len(new_nickname) > 16:
+        await message.answer("❌ Никнейм не может быть длиннее 16 символов. Попробуйте еще раз.")
+        return
+    
+    user_data = await state.get_data()
+    user_id = user_data.get('selected_user_id')
+    
+    if not user_id:
+        await message.answer("❌ Ошибка: пользователь не выбран. Попробуйте снова.")
+        await state.clear()
+        await admin_panel(message, state)
+        return
+    
+    user_data = get_user_data(user_id)
+    user_data['minecraft_username'] = new_nickname
+    update_user_data(user_id, user_data)
+    
+    # if success:
+    await message.answer(
+            f"✅ Никнейм Minecraft успешно изменен на: {new_nickname}",
+            reply_markup=get_admin_main_menu()
+        )
+    # else:
+    #     await message.answer(
+    #         "❌ Не удалось изменить никнейм. Пользователь не найден или произошла ошибка.",
+    #         reply_markup=get_admin_main_menu()
+    #     )
+    
+    await state.clear()

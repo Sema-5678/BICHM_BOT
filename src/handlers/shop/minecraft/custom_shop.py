@@ -157,9 +157,33 @@ async def choose_color(callback: CallbackQuery, state: FSMContext, callback_data
     builder.adjust(2, repeat=True)
     
     await state.set_state(CustomizationStates.waiting_for_color)
+    if custom_type == 'prefix':
+        text = f"""
+🎨 ЦВЕТНОЙ ПРЕФИКС
+
+Цена {PRICE_COLORED_NICKNAME} ВС
+Префикс отображается в игре везде перед ником
+
+❗️Префикс не должен в себя включать свастику, политику, маты, буллинг в сторону игрока,непристойные слова, 18+
+❗️Префикс может быть краси́вее в [квадратных скобках], а также учитывайте постановку пробела междуником и префиксом
+
+Напишите в ответе на это сообщение сам префикс
+
+❗️Обратите внимание, что с вашего счета сразу спишется цена, как вы ответите на сообщение
+Префикс МОМЕНТАЛЬНО применится
+        
+"""
+    else:
+        text = f"""
+🫟 Ц В Е Т Н О Й   Н И К
+
+Цена {PRICE_COLORED_NICKNAME} ВС
+
+❗️Обратите внимание, что с вашего счета сразу спишется цена, когда вы выберите цвет
+Цвет МОМЕНТАЛЬНО применится"""
+
     await callback.message.edit_text(
-        "🎨 <b>Выберите цвет</b>\n\n"
-        f"Вы настраиваете: {'префикс' if custom_type == 'prefix' else 'ник'}",
+        f"{text}\n\n🎨 <b>Выберите цвет</b>",
         reply_markup=builder.as_markup(),
         parse_mode='HTML'
     )
