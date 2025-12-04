@@ -213,6 +213,10 @@ async def handle_dice(message: Message):
     if user_data['balance'] < MINI_CASINO_BET:
         await message.answer('У вас недостаточно баланса')
         return
+    if message.forward_from_chat is not None or message.forward_from is not None:
+        await message.answer('Нельзя пересылать сообщения с 🎰, они не учитываются')
+        return
+        
     await asyncio.sleep(2.1)
     dice = message.dice  # объект aiogram.types.Dice
     emoji = dice.emoji  # например, "🎰"

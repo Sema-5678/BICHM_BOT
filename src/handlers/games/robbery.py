@@ -83,7 +83,34 @@ async def robbery_handler(callback: CallbackQuery, callback_data: RobberyCallbac
     if callback.from_user.id != callback_data.user_id:
         await callback.answer(TEXTS["errors"]["not_your_game"], show_alert=True)
         return
-    if callback_data.action == "member_type":
+
+    if callback_data.action == "start":
+        await callback.message.edit_text(callback.message.text)
+
+        
+        success_chance, multiplier = calculate_robbery_chance(callback_data.crew)
+        # print(success_chance, multiplier)
+        # if WIN_ALGORITHM == "balance":
+        final_percent = compute_adjusted_win_probability(callback_data.user_id, callback.message.chat.id, success_chance)
+        # print(final_percent)
+
+        bet_amount = Decimal(callback_data.bet)
+        if random.random() <= final_percent:
+            win_amount = bet_amount * Decimal(str(multiplier))
+            new_balance = add_money(callback_data.user_id, win_amount)
+            text = TEXTS["games"]["robbery"]["success"].format(
+                bet=format_money(bet_amount),
+                multiplier=f"{multiplier:.2f}",
+                win=format_money(win_amount),
+                balance=format_money(new_balance),
+            )
+        else:
+            new_balance = get_user_balance(callback_data.user_id)
+            text = TEXTS["games"]["robbery"]["fail"].format(balance=format_money(new_balance))
+        await callback.message.edit_text(text)
+    
+
+    elif callback_data.action == "member_type":
         new_crew = add_crew_member(callback_data.crew, callback_data.member_id)
         success_chance, multiplier = calculate_robbery_chance(new_crew)
         bet_amount = Decimal(callback_data.bet)
@@ -122,27 +149,7 @@ async def robbery_handler(callback: CallbackQuery, callback_data: RobberyCallbac
             ).pack(),
         )
         await callback.message.edit_text(text, reply_markup=keyboard.adjust(*items_on_page(len(available_members))).as_markup())
-    elif callback_data.action == "start":
-        success_chance, multiplier = calculate_robbery_chance(callback_data.crew)
-        # print(success_chance, multiplier)
-        # if WIN_ALGORITHM == "balance":
-        final_percent = compute_adjusted_win_probability(callback_data.user_id, callback.message.chat.id, success_chance)
-        # print(final_percent)
-
-        bet_amount = Decimal(callback_data.bet)
-        if random.random() <= final_percent:
-            win_amount = bet_amount * Decimal(str(multiplier))
-            new_balance = add_money(callback_data.user_id, win_amount)
-            text = TEXTS["games"]["robbery"]["success"].format(
-                bet=format_money(bet_amount),
-                multiplier=f"{multiplier:.2f}",
-                win=format_money(win_amount),
-                balance=format_money(new_balance),
-            )
-        else:
-            new_balance = get_user_balance(callback_data.user_id)
-            text = TEXTS["games"]["robbery"]["fail"].format(balance=format_money(new_balance))
-        await callback.message.edit_text(text)
+ 
     await callback.answer()
 
 
