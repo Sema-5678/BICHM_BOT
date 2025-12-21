@@ -77,10 +77,10 @@ async def cmd_bank(message: Message):
         rubles=format_money(user_data['rub_balance'], 'rub'),
         debt=format_money(user_data['debt']),
         deposit=format_money(user_data['deposit']),
-        credit_rating=user_data['credit_rating'],
-        max_loan=format_money(max_loan),
-        interest_credit=f"{INTEREST_CREDIT_RATE*100:.2f}",
-        interest_deposit=f"{INTEREST_DEPOSIT_RATE*100:.2f}",
+        # credit_rating=user_data['credit_rating'],
+        # max_loan=format_money(max_loan),
+        # interest_credit=f"{INTEREST_CREDIT_RATE*100:.2f}",
+        # interest_deposit=f"{INTEREST_DEPOSIT_RATE*100:.2f}",
         top_count=TOP_RICH_COUNT,
     )
     await message.answer(text)

@@ -30,8 +30,8 @@ def protected_callback(handler: Callable[..., Awaitable[T]]) -> Callable[..., Aw
                 if callback.from_user.id != int(callback_data[1]):
                     await callback.answer("❌ Эта кнопка не для вас!", show_alert=True)
                     return None
-                else:
-                    print("✅ Callback принят от пользователя")
+                # else:
+                    # print("✅ Callback принят от пользователя")
                     # logger.info(f"✅ Callback {callback.data} принят от пользователя {callback.from_user.id}")
             else:
                 print('В колбеке нет id')

@@ -1,6 +1,6 @@
 import asyncio
 import aiomcrcon
-
+import json
 # from app import logger
 import logging
 
@@ -55,7 +55,12 @@ class RconManager:
         """
         Выдаёт предмет игроку.
         """
-        command = f"give {player} {item} {amount}"
+        # command = f"give {player} {item} {amount}"
+        # print(88)
+        data = json.dumps({"Item": {"id": f"minecraft:{item}", "Count": amount}})
+        # print(data)
+        command = f"execute at {player} run summon item ~ ~1 ~ {data}"
+
         return await self._send(command)
 
     async def broadcast(self, message: str) -> str:

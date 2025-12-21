@@ -16,7 +16,7 @@ from config import (
 from filters.chat_types import ChatTypeFilter
 from handlers.components.functions import *
 from common.data_for_bot import TEXTS
-
+import random
 bank_router = Router()
 
 
@@ -69,6 +69,7 @@ async def take_loan_handler(message: Message):
             debt=format_money(user_data['debt']),
             credit_rating=user_data['credit_rating'],
             available=format_money(max_loan - user_data['debt']),
+            interest_credit=INTEREST_CREDIT_RATE,
         )
     )
 
@@ -168,6 +169,7 @@ async def deposit_replenish_handler(message: Message):
             amount=format_money(amount),
             deposit=format_money(user_data['deposit']),
             balance=format_money(user_data['balance']),
+            interest_deposit=INTEREST_DEPOSIT_RATE,
         )
     )
 
@@ -274,31 +276,64 @@ async def transfer_money_handler(message: Message):
 
     from_user_id = message.from_user.id
     to_user_id = message.reply_to_message.from_user.id
-
+    bot_id = message.bot.id  # ID бота
+    
     if from_user_id == to_user_id:
         await message.answer(TEXTS["errors"]["self_transfer_forbidden"])
         return
 
+    # Проверяем, что получатель - бот
+    is_to_bot = to_user_id == bot_id
+    
+    if is_to_bot:
+        # Получаем список всех пользователей, кроме отправителя и бота
+        all_users = get_all_users_data()
+        valid_users = [
+            user for user in all_users 
+            if user['user_id'] not in (from_user_id, bot_id) and user['balance'] >= 0
+        ]
+        
+        if not valid_users:
+            await message.answer("❌ Нет доступных пользователей для перевода")
+            return
+            
+        # Выбираем случайного пользователя
+        
+        random_user = random.choice(valid_users)
+        to_user_id = random_user['user_id']
+        to_username = random_user.get('username', 'пользователь')
+    
+    # Выполняем перевод
     success, result_text = transfer_money(from_user_id, to_user_id, amount)
+    
     if success:
         from_balance = get_user_balance(from_user_id)
         to_balance = get_user_balance(to_user_id)
-        text = (
-            f"✅ {result_text}\n\n"
-            f"💰 Сумма: {format_money(amount)}\n"
-            f"💳 Ваш баланс: {format_money(from_balance)}\n"
-            f"👤 Баланс получателя: {format_money(to_balance)}"
-        )
+        
+        if is_to_bot:
+            text = (
+                f"🎲 Деньги перенаправлены случайному пользователю!\n\n"
+                f"💰 Сумма: {format_money(amount)}\n"
+                f"👤 Получатель: @{to_username if to_username != 'пользователь' else 'пользователь'}\n"
+                f"💳 Ваш баланс: {format_money(from_balance)}"
+            )
+        else:
+            text = (
+                f"✅ {result_text}\n\n"
+                f"💰 Сумма: {format_money(amount)}\n"
+                f"💳 Ваш баланс: {format_money(from_balance)}\n"
+                f"👤 Баланс получателя: {format_money(to_balance)}"
+            )
     else:
         # normalize known backend messages to our centralized ones
         normalized = TEXTS["bank"]["transfer_insufficient"] if "Недостаточно" in result_text else result_text
         text = f"❌ {normalized}"
+        
     await message.answer(text)
 
 
 @bank_router.message(Command("contrib"))
 async def add_contribution(message: Message):
-
     text = random.choice(EASTER_EGGS)
     await message.answer(text)
 

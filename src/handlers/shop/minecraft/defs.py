@@ -497,10 +497,11 @@ async def give_player_items_in_minecraft(minecraft_username: str, inventory: dic
                 err_text = 'игрок не на сервере'
                 break
 
-            elif 'Gave ' in result and 'to ' in result and minecraft_username in result:
+            elif ('Gave ' in result and 'to ' in result and minecraft_username in result) or ("Summoned" in result):
                 success = True
                 continue
             
+        
             else:
                 success = False
                 err_text = f'Ошибка {result}'

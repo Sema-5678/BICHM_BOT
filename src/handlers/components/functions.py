@@ -48,36 +48,63 @@ async def check_is_valid_num(msg, amount, max=MAX_BET, min=MIN_POSITIVE_NUM):
 def format_money(amount, currency=None):
     if currency is None:
         currency = "BC"
-    
     elif currency == "rub":
         currency = "₽"
-    
     elif currency == "bc":
         currency = "BC"
-    """Форматирует денежную сумму с разделителями тысяч пробелами"""
+        
+    """Форматирует денежную сумму с разделителями тысяч пробелами.
+    Убирает лишние нули после запятой и точку, если они не нужны."""
     if isinstance(amount, (int, float)):
         amount = Decimal(str(amount))
 
     # Округляем до 2 знаков после запятой
     amount_rounded = amount.quantize(MIN_POSITIVE_NUM, rounding=ROUND_HALF_UP)
-
-    # Преобразуем в строку
-    amount_str = f"{amount_rounded:.2f}"
-
+    
+    # Преобразуем в строку и убираем лишние нули и точку, если они не нужны
+    amount_str = f"{amount_rounded:.2f}"  # Используем достаточное количество знаков
+    if '.' in amount_str:
+        # Убираем лишние нули в конце
+        amount_str = amount_str.rstrip('0')
+        # Если после точки ничего не осталось, убираем и точку
+        if amount_str.endswith('.'):
+            amount_str = amount_str[:-1]
+    
     # Разделяем целую и дробную части
-    if "." in amount_str:
-        integer_part, decimal_part = amount_str.split(".")
+    if '.' in amount_str:
+        integer_part, decimal_part = amount_str.split('.')
+        # Если дробная часть не пустая и не состоит из нулей, оставляем её
+        if decimal_part and int(decimal_part) != 0:
+            # Оставляем только значащие цифры
+            decimal_part = decimal_part.rstrip('0')
+            amount_str = f"{integer_part}.{decimal_part}"
+        else:
+            amount_str = integer_part
     else:
-        integer_part, decimal_part = amount_str, "00"
+        integer_part = amount_str
+    
+    # Форматируем целую часть с разделителями тысяч
+    try:
+        integer_part = int(integer_part)
+        formatted_integer = "{:,}".format(integer_part).replace(",", " ")
+    except (ValueError, TypeError):
+        formatted_integer = str(integer_part)
+    
+    # Собираем результат
+    result = formatted_integer
+    if '.' in amount_str and int(decimal_part) != 0:
+        result = f"{formatted_integer}.{decimal_part}"
+    
+    return f"{result} {currency}"
 
-    # Добавляем пробелы каждые 3 цифры с конца
-    formatted_integer = ""
-    for i, char in enumerate(reversed(integer_part)):
-        if i > 0 and i % 3 == 0:
-            formatted_integer = " " + formatted_integer
-        formatted_integer = char + formatted_integer
+    # # Добавляем пробелы каждые 3 цифры с конца
+    # formatted_integer = ""
+    # for i, char in enumerate(reversed(integer_part)):
+    #     if i > 0 and i % 3 == 0:
+    #         formatted_integer = " " + formatted_integer
+    #     formatted_integer = char + formatted_integer
 
-    return f"{formatted_integer}.{decimal_part} {currency}"
+    # return f"{formatted_integer}.{decimal_part} {currency}"
 
 
 def format_small_number(num):

@@ -173,7 +173,7 @@ async def transfer_items_to_minecraft(message: Message, user_id: int, minecraft_
         await minecraft_shop(message)
 
     else:
-        await message.answer(f"❌ {err_text}")
+        await message.answer(f"❌ {err_text}", parse_mode=None)
         user_data = get_user_data(user_id)
         user_data['inventory'] = inventory
         update_user_data(user_id, user_data)
