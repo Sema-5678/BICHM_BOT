@@ -37,12 +37,12 @@ async def robbery_start(message: Message):
     except:
         await message.answer(TEXTS["errors"]["use_syntax_robbed"])
         return
-    if not can_afford(message.from_user.id, bet):
+    if not await can_afford(message.from_user.id, bet):
         await message.answer(TEXTS["errors"]["insufficient_bc_heist"])
         return
     if not await check_is_valid_num(message, bet):
         return
-    old_balance = get_user_balance(message.from_user.id)
+    old_balance = await get_user_balance(message.from_user.id)
     # payout_multiplier = 2.2
     text = TEXTS["games"]["robbery"]["start"].format(
         bet=format_money(bet),
@@ -85,7 +85,7 @@ async def robbery_handler(callback: CallbackQuery, callback_data: RobberyCallbac
 
     if callback_data.action == "start":
         # await callback.message.edit_text(callback.message.text)
-        new_balance = deduct_money(callback_data.user_id, Decimal(callback_data.bet))
+        new_balance = await deduct_money(callback_data.user_id, Decimal(callback_data.bet))
 
 
         
@@ -98,7 +98,7 @@ async def robbery_handler(callback: CallbackQuery, callback_data: RobberyCallbac
         bet_amount = Decimal(callback_data.bet)
         if random.random() <= final_percent:
             win_amount = bet_amount * Decimal(str(multiplier))
-            new_balance = add_money(callback_data.user_id, win_amount)
+            new_balance = await add_money(callback_data.user_id, win_amount)
             text = TEXTS["games"]["robbery"]["success"].format(
                 bet=format_money(bet_amount),
                 multiplier=f"{multiplier:.2f}",
@@ -106,7 +106,7 @@ async def robbery_handler(callback: CallbackQuery, callback_data: RobberyCallbac
                 balance=format_money(new_balance),
             )
         else:
-            new_balance = get_user_balance(callback_data.user_id)
+            new_balance = await get_user_balance(callback_data.user_id)
             text = TEXTS["games"]["robbery"]["fail"].format(balance=format_money(new_balance))
         await callback.message.edit_text(text)
     

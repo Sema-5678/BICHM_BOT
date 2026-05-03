@@ -70,7 +70,7 @@ async def cmd_games(message: Message):
 
 @common_router.message(Command("bank"))
 async def cmd_bank(message: Message):
-    user_data = get_user_data(message.from_user.id)
+    user_data = await get_user_data(message.from_user.id)
     max_loan = calculate_max_loan(user_data["credit_rating"])
     text = TEXTS["bank"]["info"].format(
         balance=format_money(user_data['balance']),
@@ -84,5 +84,4 @@ async def cmd_bank(message: Message):
         top_count=TOP_RICH_COUNT,
     )
     await message.answer(text)
-
 

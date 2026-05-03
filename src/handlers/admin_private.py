@@ -8,7 +8,7 @@ from pathlib import Path
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
 
 from filters.chat_types import ChatTypeFilter, IsAdmin
-from utils.json_engine import get_all_users, get_categories_data, get_user_data, update_categories_data, update_user_data
+from utils.sqlite_storage import get_all_users, get_categories_data, get_user_data, update_categories_data, update_user_data
 from utils.rcon import apply_rcon_settings, rcon_manager
 from kbds.inline import get_callback_btns
 
@@ -34,8 +34,8 @@ class BotSettingsStates(StatesGroup):
     entering_rcon_password = State()
 
 # Helper functions
-def get_categories_kb():
-    categories = get_categories_data()
+async def get_categories_kb():
+    categories = await get_categories_data()
     buttons = {}
     
     for cat_id, cat_data in categories.items():
@@ -47,8 +47,8 @@ def get_categories_kb():
     
     return get_callback_btns(btns=buttons, sizes=(1,))
 
-def get_items_kb(category_id):
-    categories = get_categories_data()
+async def get_items_kb(category_id):
+    categories = await get_categories_data()
     category = categories.get(str(category_id))
     if not category:
         return None
@@ -76,8 +76,9 @@ def get_item_actions_kb(category_id, item_id):
     }
     return get_callback_btns(btns=buttons, sizes=(1,))
 
-def get_edit_item_kb(category_id, item_id):
-    item = get_categories_data()[str(category_id)]['elems'][str(item_id)]
+async def get_edit_item_kb(category_id, item_id):
+    categories = await get_categories_data()
+    item = categories[str(category_id)]['elems'][str(item_id)]
     buttons = {}
     
     for field in ['name', 'emoji', 'description', 'base_price', 'price_growth', 'max_stack', 'currency', 'minecraft_id']:
@@ -239,7 +240,7 @@ async def manage_items(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.message.edit_text(
         "📦 <b>Управление предметами</b>\n\nВыберите категорию:",
-        reply_markup=get_categories_kb(),
+        reply_markup=await get_categories_kb(),
         parse_mode='HTML'
     )
 
@@ -256,7 +257,7 @@ async def manage_items(callback: types.CallbackQuery, state: FSMContext):
 async def show_category(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(None)
     category_id = callback.data.split("_")[1]
-    categories = get_categories_data()
+    categories = await get_categories_data()
     
     if category_id not in categories:
         await callback.answer("Категория не найдена")
@@ -265,14 +266,14 @@ async def show_category(callback: types.CallbackQuery, state: FSMContext):
     category = categories[category_id]
     await callback.message.edit_text(
         f"Категория: {category['name']}\n\nВыберите предмет:",
-        reply_markup=get_items_kb(category_id)
+        reply_markup=await get_items_kb(category_id)
     )
 
 # Item callbacks
 @admin_router.callback_query(F.data.startswith("item_"))
 async def show_item(callback: types.CallbackQuery, state: FSMContext):
     _, category_id, item_id = callback.data.split("_")
-    categories = get_categories_data()
+    categories = await get_categories_data()
     
     if category_id not in categories or item_id not in categories[category_id]['elems']:
         await callback.answer("Предмет не найден")
@@ -307,7 +308,7 @@ async def add_category_start(callback: types.CallbackQuery, state: FSMContext):
 
 @admin_router.message(CategoryStates.adding_category)
 async def add_category_finish(message: types.Message, state: FSMContext):
-    categories = get_categories_data()
+    categories = await get_categories_data()
     new_id = str(max([int(k) for k in categories.keys()] + [0]) + 1)
     
     categories[new_id] = {
@@ -315,7 +316,7 @@ async def add_category_finish(message: types.Message, state: FSMContext):
         "elems": {}
     }
     
-    update_categories_data(categories)
+    await update_categories_data(categories)
     await message.answer(
         f"✅ Категория '{message.text}' добавлена!",
         reply_markup=ReplyKeyboardRemove()
@@ -379,7 +380,7 @@ async def add_item_finish(message: types.Message, state: FSMContext):
         
         state_data = await state.get_data()
         category_id = state_data['category_id']
-        categories = get_categories_data()
+        categories = await get_categories_data()
         
         if category_id not in categories:
             await message.answer("Ошибка: категория не найдена")
@@ -394,7 +395,7 @@ async def add_item_finish(message: types.Message, state: FSMContext):
         
         # Add item to category
         categories[category_id]['elems'][item_id] = item_data
-        update_categories_data(categories)
+        await update_categories_data(categories)
         
         await message.answer(
             f"✅ Предмет '{item_data['name']}' добавлен в категорию!",
@@ -415,7 +416,7 @@ async def add_item_finish(message: types.Message, state: FSMContext):
 @admin_router.callback_query(F.data.startswith("edit_item_"))
 async def edit_item_start(callback: types.CallbackQuery, state: FSMContext):
     _, _, category_id, item_id = callback.data.split("_")
-    categories = get_categories_data()
+    categories = await get_categories_data()
     
     if category_id not in categories or item_id not in categories[category_id]['elems']:
         await callback.answer("Предмет не найден")
@@ -431,7 +432,7 @@ async def edit_item_start(callback: types.CallbackQuery, state: FSMContext):
     
     await callback.message.edit_text(
         text,
-        reply_markup=get_edit_item_kb(category_id, item_id)
+        reply_markup=await get_edit_item_kb(category_id, item_id)
     )
 
 @admin_router.callback_query(F.data.startswith("edit_field_"))
@@ -444,7 +445,7 @@ async def edit_field_start(callback: types.CallbackQuery, state: FSMContext):
     )
     await state.set_state(CategoryStates.editing_item)
     
-    categories = get_categories_data()
+    categories = await get_categories_data()
     item = categories[category_id]['elems'][item_id]
     
     await callback.message.edit_text(
@@ -463,7 +464,7 @@ async def edit_field_finish(message: types.Message, state: FSMContext):
     item_id = state_data['item_id']
     field = state_data['field']
     
-    categories = get_categories_data()
+    categories = await get_categories_data()
     
     if category_id not in categories or item_id not in categories[category_id]['elems']:
         await message.answer("Ошибка: предмет не найден")
@@ -484,7 +485,7 @@ async def edit_field_finish(message: types.Message, state: FSMContext):
     
     # Update the field
     categories[category_id]['elems'][item_id][field] = value
-    update_categories_data(categories)
+    await update_categories_data(categories)
     
     await message.answer(
         f"✅ Поле '{field}' успешно обновлено!",
@@ -513,7 +514,7 @@ async def edit_field_finish(message: types.Message, state: FSMContext):
 @admin_router.callback_query(F.data.startswith("delete_item_"))
 async def delete_item(callback: types.CallbackQuery, state: FSMContext):
     _, _, category_id, item_id = callback.data.split("_")
-    categories = get_categories_data()
+    categories = await get_categories_data()
     
     if category_id not in categories or item_id not in categories[category_id]['elems']:
         await callback.answer("Предмет не найден")
@@ -537,7 +538,7 @@ async def delete_item(callback: types.CallbackQuery, state: FSMContext):
 @admin_router.callback_query(F.data.startswith("confirm_delete_item_"))
 async def confirm_delete_item(callback: types.CallbackQuery, state: FSMContext):
     _, _, _, category_id, item_id = callback.data.split("_")
-    categories = get_categories_data()
+    categories = await get_categories_data()
     
     if category_id not in categories or item_id not in categories[category_id]['elems']:
         await callback.answer("Предмет не найден")
@@ -545,7 +546,7 @@ async def confirm_delete_item(callback: types.CallbackQuery, state: FSMContext):
     
     item_name = categories[category_id]['elems'][item_id]['name']
     del categories[category_id]['elems'][item_id]
-    update_categories_data(categories)
+    await update_categories_data(categories)
     
     await callback.message.edit_text(
         f"✅ Предмет '{item_name}' был удален.",
@@ -558,7 +559,7 @@ async def confirm_delete_item(callback: types.CallbackQuery, state: FSMContext):
 # Delete category
 @admin_router.callback_query(F.data == "delete_category")
 async def delete_category_start(callback: types.CallbackQuery, state: FSMContext):
-    categories = get_categories_data()
+    categories = await get_categories_data()
     
     if not categories:
         await callback.answer("Нет категорий для удаления")
@@ -579,7 +580,7 @@ async def delete_category_start(callback: types.CallbackQuery, state: FSMContext
 @admin_router.callback_query(F.data.startswith("delete_cat_"))
 async def delete_category_confirm(callback: types.CallbackQuery, state: FSMContext):
     category_id = callback.data.split("_")[2]
-    categories = get_categories_data()
+    categories = await get_categories_data()
     
     if category_id not in categories:
         await callback.answer("Категория не найдена")
@@ -603,7 +604,7 @@ async def delete_category_confirm(callback: types.CallbackQuery, state: FSMConte
 @admin_router.callback_query(F.data.startswith("confirm_delete_cat_"))
 async def delete_category_finish(callback: types.CallbackQuery, state: FSMContext):
     category_id = callback.data.split("_")[3]
-    categories = get_categories_data()
+    categories = await get_categories_data()
     
     if category_id not in categories:
         await callback.answer("Категория не найдена")
@@ -611,7 +612,7 @@ async def delete_category_finish(callback: types.CallbackQuery, state: FSMContex
     
     category_name = categories[category_id]['name']
     del categories[category_id]
-    update_categories_data(categories)
+    await update_categories_data(categories)
     
     await callback.message.edit_text(
         f"✅ Категория '{category_name}' и все её предметы были удалены.",
@@ -689,7 +690,7 @@ async def cancel_action(callback: types.CallbackQuery, state: FSMContext):
 
 @admin_router.callback_query(F.data == "change_minecraft_nickname")
 async def change_minecraft_nickname_start(callback: types.CallbackQuery, state: FSMContext):
-    users =  get_all_users()
+    users =  await get_all_users()
     if len(users) == 0:
         await callback.answer("❌ Нет зарегистрированных пользователей", show_alert=True)
         return
@@ -738,9 +739,9 @@ async def save_minecraft_nickname(message: types.Message, state: FSMContext):
         await admin_panel(message, state)
         return
     
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     user_data['minecraft_username'] = new_nickname
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     
     # if success:
     await message.answer(

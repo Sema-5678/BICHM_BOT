@@ -20,7 +20,7 @@ from handlers.shop.minecraft.defs import ShopStates, create_minecraft_shop_keybo
 # Import the MinecraftShopCallback from callbacks
 from handlers.components.callbacks import  MinecraftShopCallback, ShopCallback
 from handlers.components.decorators import  protected_callback
-from utils.json_engine import get_categories_data
+from utils.sqlite_storage import get_categories_data
 
 replenishment_router = Router()
 replenishment_router.callback_query(ShopCallback)

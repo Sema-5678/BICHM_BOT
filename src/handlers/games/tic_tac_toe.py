@@ -159,13 +159,13 @@ async def ttt_handler(callback: CallbackQuery, callback_data: TTTCallback):
             await callback.answer(TEXTS["errors"]["not_your_game"], show_alert=True)
             return
         # Проверим балансы обоих только сейчас
-        if not can_afford(p1, bet) or not can_afford(p2, bet):
+        if not await can_afford(p1, bet) or not await can_afford(p2, bet):
             await callback.message.edit_text(TEXTS["games"]["tictactoe"]["opponent_insufficient"])
             await callback.answer()
             return
         # Списываем ставки
-        deduct_money(p1, bet)
-        deduct_money(p2, bet)
+        await deduct_money(p1, bet)
+        await deduct_money(p2, bet)
         # Случайно выбираем первого игрока; для логики первый всегда тот, кто в поле player1_id
         first = random.choice([p1, p2])
         if first == p2:
@@ -199,13 +199,13 @@ async def ttt_handler(callback: CallbackQuery, callback_data: TTTCallback):
                 # Побеждает всегда текущий p1 (тот, кто ходил последним)
                 winner_id = p1
                 win_amount = bet * Decimal('2.01')
-                add_money(winner_id, win_amount)
+                await add_money(winner_id, win_amount)
                 mark_label = w
                 print(mark_label)
                 winner_name = await _resolve_name(winner_id, callback.message)
                 # Балансы и дельты после выплаты
-                p1_balance = get_user_balance(p1)
-                p2_balance = get_user_balance(p2)
+                p1_balance = await get_user_balance(p1)
+                p2_balance = await get_user_balance(p2)
                 winner_delta = win_amount - bet
                 loser_delta = -bet
                 def fmt_delta(x: Decimal) -> str:
@@ -226,11 +226,11 @@ async def ttt_handler(callback: CallbackQuery, callback_data: TTTCallback):
                 )
             else:
                 # Ничья → вернуть ставки
-                add_money(p1, bet)
-                add_money(p2, bet)
+                await add_money(p1, bet)
+                await add_money(p2, bet)
                 # Балансы и нулевая дельта
-                p1_balance = get_user_balance(p1)
-                p2_balance = get_user_balance(p2)
+                p1_balance = await get_user_balance(p1)
+                p2_balance = await get_user_balance(p2)
                 p1_name = await _resolve_name(p1, callback.message)
                 p2_name = await _resolve_name(p2, callback.message)
                 zero = Decimal('0')

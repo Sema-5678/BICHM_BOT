@@ -33,7 +33,7 @@ async def take_loan_handler(message: Message):
         return
 
     user_id = message.from_user.id
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
 
     # Проверяем кредитный рейтинг
     if user_data["credit_rating"] < MIN_CREDIT_RATING:
@@ -61,7 +61,7 @@ async def take_loan_handler(message: Message):
     # и сразу взять новый перед начислением процентов
     user_data["max_loan"] = max(user_data["debt"], user_data["max_loan"])
     
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
 
     await message.answer(
         TEXTS["bank"]["take_loan_approved"].format(
@@ -88,7 +88,7 @@ async def pay_off_loan_handler(message: Message):
     
 
     user_id = message.from_user.id
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
 
     
 
@@ -121,7 +121,7 @@ async def pay_off_loan_handler(message: Message):
         if amount >= threshold:
             user_data["credit_rating"] = user_data["credit_rating"] + 1
 
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
 
     await message.answer(
         TEXTS["bank"]["pay_off_success"].format(
@@ -144,7 +144,7 @@ async def deposit_replenish_handler(message: Message):
         return
 
     user_id = message.from_user.id
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
 
 
     if user_data["balance"] < amount:
@@ -162,7 +162,7 @@ async def deposit_replenish_handler(message: Message):
     user_data["balance"] -= amount
     user_data["deposit"] += amount
 
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
 
     await message.answer(
         TEXTS["bank"]["deposit_replenished"].format(
@@ -186,7 +186,7 @@ async def deposit_withdraw_handler(message: Message):
         return
 
     user_id = message.from_user.id
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
 
     if user_data["deposit"] < amount:
         amount = user_data["deposit"]  # Нельзя снять больше вклада
@@ -200,7 +200,7 @@ async def deposit_withdraw_handler(message: Message):
     # и сразу положить обратно перед начислением процентов
     user_data["min_deposit"] = min(user_data["deposit"], user_data["min_deposit"])
 
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
 
     await message.answer(
         TEXTS["bank"]["deposit_withdrawn"].format(
@@ -227,7 +227,7 @@ async def show_games(message: Message):
 
 @bank_router.message(Command("bctop"))
 async def show_top_rich(message: Message):
-    top_users = get_top_rich(TOP_RICH_COUNT)
+    top_users = await get_top_rich(TOP_RICH_COUNT)
     if not top_users:
         await message.answer(TEXTS["bank"]["top_rich_no_data"])
         return
@@ -287,7 +287,7 @@ async def transfer_money_handler(message: Message):
     
     if is_to_bot:
         # Получаем список всех пользователей, кроме отправителя и бота
-        all_users = get_all_users_data()
+        all_users = await get_all_users_data()
         valid_users = [
             user for user in all_users 
             if user['user_id'] not in (from_user_id, bot_id) and user['balance'] >= 0
@@ -304,11 +304,11 @@ async def transfer_money_handler(message: Message):
         to_username = random_user.get('username', 'пользователь')
     
     # Выполняем перевод
-    success, result_text = transfer_money(from_user_id, to_user_id, amount)
+    success, result_text = await transfer_money(from_user_id, to_user_id, amount)
     
     if success:
-        from_balance = get_user_balance(from_user_id)
-        to_balance = get_user_balance(to_user_id)
+        from_balance = await get_user_balance(from_user_id)
+        to_balance = await get_user_balance(to_user_id)
         
         if is_to_bot:
             text = (
@@ -345,8 +345,8 @@ async def getbc_handler(message: Message):
     username = message.from_user.username or ""
     
     # Проверяем, может ли пользователь использовать команду
-    if not can_use_getbc(user_id):
-        remaining_time = get_getbc_cooldown_remaining(user_id)
+    if not await can_use_getbc(user_id):
+        remaining_time = await get_getbc_cooldown_remaining(user_id)
         time_str = format_time_remaining(remaining_time)
         
         await message.answer(
@@ -355,8 +355,8 @@ async def getbc_handler(message: Message):
         return
     
     # Используем команду и получаем награду
-    reward = use_getbc(user_id, username)
-    user_data = get_user_data(user_id)
+    reward = await use_getbc(user_id, username)
+    user_data = await get_user_data(user_id)
     
     # Формируем сообщение с username если есть
     username_text = f"@{username}" if username else TEXTS["static"]["user_fallback"]

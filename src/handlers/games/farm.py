@@ -10,7 +10,7 @@ from filters.chat_types import ChatTypeFilter
 
 # Import functions from farm_functions
 from config import FarmConfig
-from utils.json_engine import get_user_data, update_user_data
+from utils.sqlite_storage import get_user_data, update_user_data
 
 from .farm_functions import (
     parse_coordinates,
@@ -52,7 +52,7 @@ async def handle_cell_selection(message: Message, state: FSMContext):
         return
     
     user_id = message.from_user.id
-    user_field, soil_field, field_size = get_user_farm_data(user_id)
+    user_field, soil_field, field_size = await get_user_farm_data(user_id)
     
     # Parse coordinates
     coords = parse_coordinates(message.text, field_size)
@@ -113,7 +113,7 @@ async def handle_buy_plant(callback: CallbackQuery, state: FSMContext):
     
     # Get user's farm data
     user_id = callback.from_user.id
-    user_field, soil_field, field_size = get_user_farm_data(user_id)
+    user_field, soil_field, field_size = await get_user_farm_data(user_id)
     
     # Check if the cell is still empty
     if user_field[row][col].get('plant'):
@@ -175,7 +175,7 @@ async def handle_confirm_purchase(callback: CallbackQuery, state: FSMContext):
     row, col = int(row), int(col)
     
     user_id = callback.from_user.id
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     farm_data = user_data['farm_minigame']
     user_field = farm_data.get('field', [])
     
@@ -201,7 +201,7 @@ async def handle_confirm_purchase(callback: CallbackQuery, state: FSMContext):
 
     
     # Save changes
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     
     # Show success message
     await callback.message.answer(
@@ -224,9 +224,9 @@ async def handle_dig_up_plant(callback: CallbackQuery, state: FSMContext):
     
     # Get user's data
     user_id = callback.from_user.id
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     farm_data = user_data['farm_minigame']
-    user_field, soil_field, field_size = get_user_farm_data(user_id)
+    user_field, soil_field, field_size = await get_user_farm_data(user_id)
     
     # Check if there's actually a plant to remove
     if not user_field[row][col].get('plant'):
@@ -239,13 +239,13 @@ async def handle_dig_up_plant(callback: CallbackQuery, state: FSMContext):
     
     # Update user data
     user_data['farm_minigame']['field'] = user_field
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     
     # Recalculate income per minute
     income_per_minute, field = calculate_income_per_minute(user_field)
     user_data['farm_minigame']['income_per_minute'] = str(income_per_minute)
     user_data['farm_minigame']['field'] = field
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     
     # Show success message and return to cell view
     await callback.answer(f"Вы выкопали {plant_name}.")
@@ -274,7 +274,7 @@ async def handle_back_to_cell(callback: CallbackQuery, state: FSMContext):
     
     # Get user's farm data
     user_id = callback.from_user.id
-    user_field, soil_field, field_size = get_user_farm_data(user_id)
+    user_field, soil_field, field_size = await get_user_farm_data(user_id)
     
     # Show cell info
     cell_info = get_cell_info(user_field, soil_field, row, col)
@@ -370,7 +370,7 @@ async def handle_farmer_inventory(callback: CallbackQuery):
 async def handle_upgrade_farm(callback: CallbackQuery):
     """Handle farm upgrade button click"""
     user_id = callback.from_user.id
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     
     # Get current field size
     farm_minigame = user_data['farm_minigame']
@@ -411,7 +411,7 @@ async def handle_upgrade_farm(callback: CallbackQuery):
             row.append(BASE_SELL_DATA)
     
     # Update user data
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     
     # Show success message
     await callback.answer(f"Ферма улучшена до {new_size}x{new_size}!", show_alert=True)

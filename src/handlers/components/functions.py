@@ -19,7 +19,7 @@ from config import (
     MIN_POSITIVE_NUM,
     chats_bonuses,
 )
-from utils.json_engine import get_user_data, update_user_data, database_path
+from utils.sqlite_storage import get_all_users, get_user_data, update_user_data
 from common.data_for_bot import TEXTS
 
 MAX_BALANCE = Decimal(str(MAX_BALANCE))
@@ -131,15 +131,15 @@ def is_valid_bet(amount):
     return MIN_POSITIVE_NUM <= amount <= MAX_BET
 
 
-def can_afford(user_id, amount):
-    user_data = get_user_data(user_id)
+async def can_afford(user_id, amount):
+    user_data = await get_user_data(user_id)
     if isinstance(amount, (int, float)):
         amount = Decimal(str(amount))
     return user_data["balance"] >= amount
 
 
-def deduct_money(user_id, amount):
-    user_data = get_user_data(user_id)
+async def deduct_money(user_id, amount):
+    user_data = await get_user_data(user_id)
     if isinstance(amount, (int, float)):
         amount = Decimal(str(amount))
 
@@ -147,12 +147,12 @@ def deduct_money(user_id, amount):
     if user_data["balance"] < Decimal("0"):
         user_data["balance"] = Decimal("0")
 
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     return user_data["balance"]
 
 
-def add_money(user_id, amount):
-    user_data = get_user_data(user_id)
+async def add_money(user_id, amount):
+    user_data = await get_user_data(user_id)
     if isinstance(amount, (int, float)):
         amount = Decimal(str(amount))
 
@@ -160,12 +160,12 @@ def add_money(user_id, amount):
     if user_data["balance"] > MAX_BALANCE:
         user_data["balance"] = MAX_BALANCE
 
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     return user_data["balance"]
 
 
-def get_user_balance(user_id):
-    return get_user_data(user_id)["balance"]
+async def get_user_balance(user_id):
+    return (await get_user_data(user_id))["balance"]
 
 
 def validate_casino_bet(initial_bet, round_num):
@@ -335,44 +335,32 @@ def add_crew_member(crew_str, new_member_id):
     return ",".join(crew_ids)
 
 
-def get_all_users_data():
-    users_data = []
-    users_dir_path = os.path.join(database_path, "users")
-    if not os.path.exists(users_dir_path):
-        return []
-    for filename in os.listdir(users_dir_path):
-        if filename.endswith(".json"):
-            user_id = int(filename.split(".")[0])
-            try:
-                user_data = get_user_data(user_id)
-                users_data.append((user_id, user_data))
-            except:
-                continue
-    return users_data
+async def get_all_users_data():
+    return await get_all_users()
 
 
-def get_top_rich(limit=TOP_RICH_COUNT):
-    users_data = get_all_users_data()
+async def get_top_rich(limit=TOP_RICH_COUNT):
+    users_data = await get_all_users_data()
     users_data.sort(key=lambda x: x[1]["balance"] + x[1]["deposit"], reverse=True)
     return users_data[:limit]
 
 
-def transfer_money(from_user_id, to_user_id, amount):
-    from_user_data = get_user_data(from_user_id)
-    to_user_data = get_user_data(to_user_id)
+async def transfer_money(from_user_id, to_user_id, amount):
+    from_user_data = await get_user_data(from_user_id)
+    to_user_data = await get_user_data(to_user_id)
     if isinstance(amount, (int, float)):
         amount = Decimal(str(amount))
     if from_user_data["balance"] < amount:
         return False, "Недостаточно средств"
     from_user_data["balance"] -= amount
     to_user_data["balance"] += amount
-    update_user_data(from_user_id, from_user_data)
-    update_user_data(to_user_id, to_user_data)
+    await update_user_data(from_user_id, from_user_data)
+    await update_user_data(to_user_id, to_user_data)
     return True, "Перевод успешно выполнен"
 
 
-def take_loan(user_id, amount):
-    user_data = get_user_data(user_id)
+async def take_loan(user_id, amount):
+    user_data = await get_user_data(user_id)
     if isinstance(amount, (int, float)):
         amount = Decimal(str(amount))
     loan = {
@@ -384,12 +372,12 @@ def take_loan(user_id, amount):
     user_data["debt"] += amount
     user_data["balance"] += amount
     user_data["credit_rating"] -= 5
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     return user_data
 
 
-def pay_debt(user_id, amount):
-    user_data = get_user_data(user_id)
+async def pay_debt(user_id, amount):
+    user_data = await get_user_data(user_id)
     if isinstance(amount, (int, float)):
         amount = Decimal(str(amount))
     if amount > user_data["debt"]:
@@ -397,7 +385,7 @@ def pay_debt(user_id, amount):
     user_data["balance"] -= amount
     user_data["debt"] -= amount
     user_data["credit_rating"] += 2
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     return user_data
 
 
@@ -412,18 +400,18 @@ def calculate_max_loan(credit_rating):
     # return base_amount + rating_bonus
 
 
-def can_use_getbc(user_id):
+async def can_use_getbc(user_id):
     """Проверяет, может ли пользователь использовать команду /getbc"""
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     current_time = int(time.time())
     last_use_time = user_data.get("getbc_time", 0)
 
     return current_time - last_use_time >= GET_BC_TIME_LIMIT
 
 
-def get_getbc_cooldown_remaining(user_id):
+async def get_getbc_cooldown_remaining(user_id):
     """Возвращает оставшееся время до возможности использования /getbc в секундах"""
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     current_time = int(time.time())
     last_use_time = user_data.get("getbc_time", 0)
 
@@ -457,9 +445,9 @@ def generate_getbc_reward():
     return Decimal(str(round(reward, 2)))
 
 
-def use_getbc(user_id, username=None):
+async def use_getbc(user_id, username=None):
     """Использует команду /getbc и возвращает награду"""
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     current_time = int(time.time())
 
     # Генерируем награду
@@ -476,7 +464,7 @@ def use_getbc(user_id, username=None):
     user_data["balance"] += reward
 
     # Сохраняем данные
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
 
     return reward
 

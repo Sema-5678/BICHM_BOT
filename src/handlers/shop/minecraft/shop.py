@@ -24,7 +24,7 @@ from handlers.shop.minecraft.defs import ShopStates, create_shop_keyboard, get_i
 # Import the ShopCallback from callbacks
 from handlers.components.callbacks import MinecraftShopCallback, ShopCallback
 from handlers.components.decorators import  protected_callback
-from utils.json_engine import get_categories_data
+from utils.sqlite_storage import get_categories_data
 
 
 

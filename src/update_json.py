@@ -1,46 +1,15 @@
-from utils.json_engine import get_all_users, update_user_data
+import asyncio
 
-f = get_all_users()
-for user_id, user_data in f:
-    # new_data = {
-    #     "inventory" : {},
-    #     "minecraft_goods_count_season" : {},
-    #     # "minecraft_username" : {},
-    #     "rub_balance" : {},
-    #     "balance" : 10_000,
-    #     "deposit":0
-
-    # }
-
-    # user_data['deposit'] = "0"
-    # user_data['rub_balance'] = "0"
-    # user_data['balance'] = "0"
-    # user_data['min_deposit'] = "0"
+from utils.sqlite_storage import get_all_users, update_user_data
 
 
+async def main() -> None:
+    users = await get_all_users()
+    for user_id, user_data in users:
+        await update_user_data(user_id, user_data)
 
-    # if user_data['balance'] >=10_000:
-    #     user_data['balance'] = 5_000
-    #     user_data['rub_balance'] = 3
-
-    
-
-
-    # if user_data['balance'] >=100_000:
-    #     user_data['balance'] = 10_000
-    #     user_data['rub_balance'] = 10
-
-    
+    print("Done")
 
 
-
-
-
-
-
-
-    # user_data.update(new_data)
-
-    update_user_data(user_id, user_data)
-
-print("Done")
+if __name__ == "__main__":
+    asyncio.run(main())

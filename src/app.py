@@ -9,7 +9,8 @@ from aiogram.types import BotCommand
 from dotenv import find_dotenv, load_dotenv
 
 from utils.background_tasks import interest_scheduler
-from utils.json_engine import get_admins_data, update_admins_data
+from utils.sqlite_storage import get_admins_data, update_admins_data
+from database.engine import create_db
 load_dotenv(find_dotenv())
 import config
 
@@ -137,10 +138,17 @@ dp = Dispatcher()
 async def on_startup(bot):
     """Функция, выполняемая при запуске бота"""
     logger.info("Бот запускается...")
+
+    # Ensure SQLite schema exists
+    try:
+        await create_db()
+    except Exception as e:
+        logger.error(f"Ошибка инициализации SQLite схемы: {e}")
+        raise
     
     # Загружаем список администраторов
     try:
-        admins_data = get_admins_data()
+        admins_data = await get_admins_data()
         bot.my_admins_list = admins_data.get("admins_ids", [])
         logger.info(f"Загружено {len(bot.my_admins_list)} администраторов")
     except Exception as e:

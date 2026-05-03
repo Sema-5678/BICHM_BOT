@@ -36,11 +36,11 @@ async def _validate_and_process_bet(message: Message, bet: Decimal):
         await message.answer(TEXTS["errors"]["bet_range"].format(min_val=Decimal('0.01'), max_val=format_money(Decimal('0'))))
         return None, None
     user_id = message.from_user.id
-    if not can_afford(user_id, bet):
+    if not await can_afford(user_id, bet):
         await message.answer(TEXTS["errors"]["insufficient_bc_game"])
         return None, None
-    old_balance = get_user_balance(user_id)
-    new_balance = deduct_money(user_id, bet)
+    old_balance = await get_user_balance(user_id)
+    new_balance = await deduct_money(user_id, bet)
     return old_balance, new_balance
 
 
@@ -107,13 +107,13 @@ async def blackjack_handler(callback: CallbackQuery, callback_data: BlackjackCal
                 player_cards=player_cards,
                 player_score=player_score,
                 lost=format_money(bet),
-                balance=format_money(get_user_balance(user_id)),
+                balance=format_money(await get_user_balance(user_id)),
             )
             await callback.message.edit_text(text)
         else:
             text = TEXTS["games"]["blackjack"]["regular"].format(
                 bet=format_money(bet),
-                balance=format_money(get_user_balance(user_id)),
+                balance=format_money(await get_user_balance(user_id)),
                 player_cards=player_cards,
                 player_score=player_score,
                 dealer_visible=get_dealer_visible_cards(dealer_cards),
@@ -153,20 +153,20 @@ async def blackjack_handler(callback: CallbackQuery, callback_data: BlackjackCal
         player_score = calculate_score(player_cards)
         if player_score > 21:
             result = TEXTS["games"]["common"]["lose_bust"]
-            new_balance = get_user_balance(user_id)
+            new_balance = await get_user_balance(user_id)
         elif dealer_score > 21:
             win_amount = bet * BLACKJACK_PAYOUT_X
-            new_balance = add_money(user_id, win_amount)
+            new_balance = await add_money(user_id, win_amount)
             result = f"{TEXTS['games']['common']['dealer_busted_prefix']} {TEXTS['labels']['win_amount'].format(amount=format_money(win_amount))}"
         elif player_score > dealer_score:
             win_amount = bet * BLACKJACK_PAYOUT_X   
-            new_balance = add_money(user_id, win_amount)
+            new_balance = await add_money(user_id, win_amount)
             result = TEXTS["labels"]["win_amount"].format(amount=format_money(win_amount))
         elif player_score < dealer_score:
             result = TEXTS["games"]["common"]["dealer_won"]
-            new_balance = get_user_balance(user_id)
+            new_balance = await get_user_balance(user_id)
         else:
-            new_balance = add_money(user_id, bet)
+            new_balance = await add_money(user_id, bet)
             result = TEXTS["labels"]["draw"]
         text = TEXTS["games"]["blackjack"]["result"].format(
             bet=format_money(bet),

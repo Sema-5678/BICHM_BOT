@@ -20,7 +20,7 @@ from handlers.shop.minecraft.defs import ShopStates, create_minecraft_shop_keybo
 # Import the MinecraftShopCallback from callbacks
 from handlers.components.callbacks import  MinecraftShopCallback, ShopCallback
 from handlers.components.decorators import  protected_callback
-from utils.json_engine import get_categories_data
+from utils.sqlite_storage import get_categories_data
 
 minecraft_items_shop_router = Router()
 # minecraft_items_shop_router.callback_query(ShopCallback.filter(F.shop_type == "0"))
@@ -95,7 +95,7 @@ async def show_category_items(callback: CallbackQuery, state: FSMContext, callba
     """Show items in a specific category"""
     user_id = callback.from_user.id
     category_id = callback_data.category_id
-    categories = get_categories_data()
+    categories = await get_categories_data()
     category = categories.get(category_id)
 
     if not category:
@@ -125,7 +125,7 @@ async def show_item_details(callback: CallbackQuery, state: FSMContext, callback
     category_id = callback_data.category_id
     item_id = callback_data.item_id
     
-    categories = get_categories_data()
+    categories = await get_categories_data()
     category = categories.get(category_id)
     
     if not category:
@@ -140,7 +140,7 @@ async def show_item_details(callback: CallbackQuery, state: FSMContext, callback
     currency = item['currency']  # Теперь будет ошибка если ключа нет
     currency_text = " BC" if currency == "bc" else "💵 Рубли"
     
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     
     # Get user balance for the current currency
     if currency == 'bc':
@@ -228,7 +228,7 @@ async def buy_item(callback: CallbackQuery, state: FSMContext, callback_data: Mi
     state_data = await state.get_data()
     currency = state_data.get('current_currency')
     
-    categories = get_categories_data()
+    categories = await get_categories_data()
     category = categories.get(category_id)
     
     if not category:
@@ -240,7 +240,7 @@ async def buy_item(callback: CallbackQuery, state: FSMContext, callback_data: Mi
         await callback.answer("Предмет не найден")
         return
     
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     season_counts = user_data.setdefault('minecraft_goods_count_season', {})
     item_key = get_item_key(category_id, item_id)
     previous_purchases = int(season_counts.get(item_key, 0))
@@ -264,7 +264,7 @@ async def buy_item(callback: CallbackQuery, state: FSMContext, callback_data: Mi
         user_data['balance'] = user_data['balance'] - total_price
     
     season_counts[item_key] = previous_purchases + quantity
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     
     add_item_to_inventory(user_id, category_id, item_id, quantity)
     

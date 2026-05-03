@@ -25,7 +25,6 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from filters.chat_types import ChatTypeFilter
-from utils.json_engine import get_user_data, update_user_data
 
 games_router = Router()
 games_router.message.filter(ChatTypeFilter(["group", "supergroup"]))

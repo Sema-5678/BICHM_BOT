@@ -11,7 +11,7 @@ from aiogram.fsm.context import FSMContext
 from config import FarmConfig
 import time
 from datetime import datetime
-from utils.json_engine import get_farm_data, get_user_data, update_user_data
+from utils.sqlite_storage import get_farm_data, get_user_data, update_user_data
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from handlers.common_funcs import send_msg_call
 
@@ -213,15 +213,15 @@ def get_plant_info(plant_id: str) -> str:
     return info
 
 
-def get_user_farm_data(user_id: int) -> tuple:
+async def get_user_farm_data(user_id: int) -> tuple:
     """Get all necessary farm data for a user directly from JSON."""
     # Get user's farm data
-    farm_data = get_user_data(user_id, 'farm_minigame')
+    farm_data = await get_user_data(user_id, 'farm_minigame')
     user_field = farm_data.get('field')
     field_size = farm_data.get('field_size')  # Default to 3x3 if not set
     
     # Get the current farm field from mini_game_farm.json
-    full_field = get_farm_data()['curr_field']
+    full_field = (await get_farm_data())['curr_field']
     
     # Get the bottom-left corner of the field based on user's field size
     start_row = len(full_field) - field_size
@@ -304,9 +304,9 @@ def calculate_income(user_data: dict) -> Decimal:
 async def show_farm_field(message: Message | CallbackQuery, state: FSMContext, error: str = None) -> None:
     """Display the farm field to the user with navigation buttons."""
     user_id = message.from_user.id
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     farm_data = user_data['farm_minigame']
-    user_field, soil_field, field_size = get_user_farm_data(user_id)
+    user_field, soil_field, field_size = await get_user_farm_data(user_id)
     
     # Calculate income since last visit
     income = calculate_income(user_data)
@@ -314,7 +314,7 @@ async def show_farm_field(message: Message | CallbackQuery, state: FSMContext, e
         # Add income to user's FC balance in farm_minigame
         fc_balance = Decimal(farm_data['fc_balance'])
         farm_data['fc_balance'] = str(fc_balance + income)
-        update_user_data(user_id, user_data)
+        await update_user_data(user_id, user_data)
     
     # Format income message
     income_message = f"\n💰 Вы получили {income:.2f} FC за время отсутствия!" if income > 0 else ""
@@ -371,5 +371,3 @@ async def show_farm_field(message: Message | CallbackQuery, state: FSMContext, e
         reply_markup=reply_markup
     )
   
-
-

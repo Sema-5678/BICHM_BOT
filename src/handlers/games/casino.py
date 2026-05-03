@@ -22,7 +22,7 @@ from handlers.components.functions import (
 )
 from handlers.components.callbacks import CasinoCallback
 from common.data_for_bot import TEXTS
-from utils.json_engine import get_user_data
+from utils.sqlite_storage import get_user_data
 
 
 casino_router = Router()
@@ -41,11 +41,11 @@ async def casino_start(message: Message):
     if not await check_is_valid_num(message, bet):
         return
     user_id = message.from_user.id
-    if not can_afford(user_id, bet):
+    if not await can_afford(user_id, bet):
         await message.answer(TEXTS["errors"]["insufficient_bc_game"])
         return
-    old_balance = get_user_balance(user_id)
-    new_balance = deduct_money(user_id, bet)
+    old_balance = await get_user_balance(user_id)
+    new_balance = await deduct_money(user_id, bet)
     
     base_p = Decimal("0.50")
     adjusted_p = compute_adjusted_win_probability(user_id, message.chat.id, base_p)
@@ -56,7 +56,7 @@ async def casino_start(message: Message):
         player_number = (
             random.randint(dealer_number, 20) if dealer_number < 20 else dealer_number
         )
-        new_balance = add_money(user_id, bet*2)
+        new_balance = await add_money(user_id, bet*2)
 
         text = TEXTS["games"]["casino"]["win"].format(
             bet=format_money(bet),
@@ -128,7 +128,7 @@ casino_dice_dict = {
 
 @casino_router.message(F.dice)
 async def handle_dice(message: Message):
-    user_data = get_user_data(message.from_user.id)
+    user_data = await get_user_data(message.from_user.id)
     if user_data['balance'] < MINI_CASINO_BET:
         await message.answer('У вас недостаточно баланса')
         return
@@ -151,7 +151,7 @@ async def handle_dice(message: Message):
         }
     )
     win_bet = win["prize"] * MINI_CASINO_BET
-    new_balance = add_money(message.from_user.id, win_bet)
+    new_balance = await add_money(message.from_user.id, win_bet)
     prize_text = f"   + {format_money(win_bet)}" if win["prize"] > 0 else f"   - {format_money(-win_bet)}"
 
     text = f'{win["text"]}{prize_text}\n🎰 Баланс: {format_money(new_balance)}'

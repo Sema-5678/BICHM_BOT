@@ -2,7 +2,7 @@ import asyncio
 from decimal import Decimal
 import os
 import random
-from utils.json_engine import get_all_users, update_user_data, get_farm_data, update_farm_data
+from utils.sqlite_storage import get_all_users, update_user_data, get_farm_data, update_farm_data
 import random
 from config import (
     INTEREST_CREDIT_RATE_day, 
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 async def process_interest():
     logger.info("Начисляет проценты всем пользователям")
-    users = get_all_users()
+    users = await get_all_users()
 
     today = datetime.today().date()
 
@@ -54,7 +54,7 @@ async def process_interest():
                     last_date += timedelta(days=1)
                     
             user_data["last_interest_date"] = today.strftime("%Y-%m-%d")
-            update_user_data(user_id, user_data)
+            await update_user_data(user_id, user_data)
 
         except Exception as e:
                 logger.exception(f"Ошибка при обработке пользователя {user_id}: {e}")
@@ -123,7 +123,7 @@ async def reset_minecraft_season():
     #     logger.error(f"Error updating mini-farm field: {e}")
     
     # Сбрасываем баланс пользователей
-    users = get_all_users()
+    users = await get_all_users()
     
     for index, (user_id, user_data) in enumerate(users):
         try:
@@ -136,7 +136,7 @@ async def reset_minecraft_season():
             # user_data['rub_balance'] = '0.00'
             
             # Сохраняем изменения
-            update_user_data(user_id, user_data)
+            await update_user_data(user_id, user_data)
 
             if index % 10 == 0:
                 await asyncio.sleep(0.1)

@@ -91,3 +91,8 @@ async def orm_get_admins_ids(session: AsyncSession) -> list[int]:
 
 async def orm_set_admins_ids(session: AsyncSession, admin_ids: list[int]) -> None:
     await orm_set_singleton(session, "admins_data", {"admins_ids": [int(x) for x in admin_ids]})
+
+
+async def orm_list_users(session: AsyncSession) -> list[User]:
+    result = await session.execute(select(User))
+    return list(result.scalars().all())

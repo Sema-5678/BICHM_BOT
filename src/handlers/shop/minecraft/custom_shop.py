@@ -21,7 +21,7 @@ from handlers.common_funcs import send_msg_call
 from kbds.inline import get_callback_btns
 from handlers.components.callbacks import MinecraftShopCallback, CustomizationCallback
 from handlers.components.decorators import protected_callback
-from utils.json_engine import get_categories_data
+from utils.sqlite_storage import get_categories_data
 from utils.rcon import rcon_manager
 
 # Service prices (in BC)
@@ -197,7 +197,7 @@ async def set_color(callback: CallbackQuery, state: FSMContext, callback_data: C
     custom_type = callback_data.custom_type
     
     # Get user data and check balance
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     
     # Determine the price based on service type
     price = PRICE_COLORED_PREFIX if custom_type == "prefix" else PRICE_COLORED_NICKNAME
@@ -230,7 +230,7 @@ async def set_color(callback: CallbackQuery, state: FSMContext, callback_data: C
         
         # Deduct balance
         user_data['balance'] -= price
-        update_user_data(user_id, user_data)
+        await update_user_data(user_id, user_data)
         
         # Format the nickname with color
         # formatted_nickname = f"&{color}{minecraft_username}"
@@ -267,7 +267,7 @@ async def set_color(callback: CallbackQuery, state: FSMContext, callback_data: C
         else:
             # Return money if command failed
             user_data['balance'] += price
-            update_user_data(user_id, user_data)
+            await update_user_data(user_id, user_data)
             await callback.message.answer(f"❌ Ошибка: {result}")
 
 @minecraft_custom_shop_router.message(CustomizationStates.waiting_for_text)
@@ -292,7 +292,7 @@ async def handle_prefix_text(message: Message, state: FSMContext):
         await state.clear()
         return
     
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     minecraft_username = user_data.get('minecraft_username')
     
     if not minecraft_username:
@@ -308,7 +308,7 @@ async def handle_prefix_text(message: Message, state: FSMContext):
     
     # Deduct balance
     user_data['balance'] -= price
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     
     # Format the prefix with color
     # formatted_prefix = f"&{color}[{text}]&r"
@@ -352,7 +352,7 @@ async def handle_prefix_text(message: Message, state: FSMContext):
     else:
         # Return money if command failed
         user_data['balance'] += price
-        update_user_data(user_id, user_data)
+        await update_user_data(user_id, user_data)
         await message.answer(f"❌ Ошибка: {result}")
     
     await state.clear()

@@ -21,7 +21,7 @@ from kbds.inline import get_callback_btns
 # Import the ShopCallback from callbacks
 from handlers.components.callbacks import CustomizationCallback, MinecraftShopCallback, ShopCallback
 from handlers.components.decorators import  protected_callback
-from utils.json_engine import get_categories_data
+from utils.sqlite_storage import get_categories_data
 from utils.rcon import rcon_manager
 
 
@@ -72,29 +72,29 @@ def calculate_item_price(base_price: Decimal, price_growth: Decimal, quantity: i
 
     return total_price.quantize(MIN_POSITIVE_NUM)
 
-def get_user_inventory(user_id: int) -> dict:
+async def get_user_inventory(user_id: int) -> dict:
     """Get user's inventory"""
-    inventory = get_user_data(user_id, 'inventory')
+    inventory = await get_user_data(user_id, 'inventory')
     return inventory
 
-def update_user_inventory(user_id: int, inventory: dict):
+async def update_user_inventory(user_id: int, inventory: dict):
     """Update user's inventory"""
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     user_data['inventory'] = inventory
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
 
-def clear_user_inventory(user_id: int):
+async def clear_user_inventory(user_id: int):
     """Clear user's inventory"""
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     if 'inventory' in user_data:
         user_data['inventory'] = {}
-        update_user_data(user_id, user_data)
+        await update_user_data(user_id, user_data)
         return True
     return False
 
-def add_item_to_inventory(user_id: int, category_id: str, item_id: str, quantity: int = 1):
+async def add_item_to_inventory(user_id: int, category_id: str, item_id: str, quantity: int = 1):
     """Add item to user's inventory"""
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     if 'inventory' not in user_data:
         user_data['inventory'] = {}
     
@@ -104,7 +104,7 @@ def add_item_to_inventory(user_id: int, category_id: str, item_id: str, quantity
     else:
         user_data['inventory'][item_key] = quantity
     
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     return True
 
 
@@ -283,7 +283,7 @@ async def minecraft_shop(callback: CallbackQuery | Message, state: FSMContext=No
     """Show Minecraft shop main menu"""
     # await state.set_state(ShopStates.viewing_categories)
     # await state.update_data(user_id=callback.from_user.id)
-    categories = get_categories_data()
+    categories = await get_categories_data()
     
     if not categories:
         await callback.answer("В магазине пока нет товаров.")
@@ -336,7 +336,7 @@ async def create_inventory_keyboard(user_id: int):
 async def create_item_details_keyboard(user_id: int, category_id: str, item_id: str):
     """Create keyboard for item details with purchase options"""
     builder = InlineKeyboardBuilder()
-    categories = get_categories_data()
+    categories = await get_categories_data()
     category = categories.get(category_id)
     
     if not category:
@@ -382,7 +382,7 @@ async def create_item_details_keyboard(user_id: int, category_id: str, item_id: 
 async def create_items_keyboard(user_id: int, category_id: str):
     """Create items keyboard for a specific category"""
     builder = InlineKeyboardBuilder()
-    categories = get_categories_data()
+    categories = await get_categories_data()
     category = categories.get(category_id)
     
     if not category:
@@ -425,7 +425,7 @@ async def create_items_keyboard(user_id: int, category_id: str):
 async def create_categories_keyboard(user_id: int):
     """Create categories keyboard with user-specific callbacks"""
     builder = InlineKeyboardBuilder()
-    categories = get_categories_data()
+    categories = await get_categories_data()
     
     for cat_id, cat_data in categories.items():
         builder.button(
@@ -471,7 +471,7 @@ async def create_categories_keyboard(user_id: int):
 
 async def give_player_items_in_minecraft(minecraft_username: str, inventory: dict) -> bool:
     """Transfer all items from inventory to Minecraft player via RCON"""
-    categories = get_categories_data()
+    categories = await get_categories_data()
     success = True
     err_text = ''
     

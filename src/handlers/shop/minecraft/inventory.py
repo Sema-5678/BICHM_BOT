@@ -21,7 +21,7 @@ from handlers.shop.minecraft.defs import ShopStates, create_minecraft_shop_keybo
 from handlers.components.callbacks import  MinecraftShopCallback
 from handlers.components.decorators import  protected_callback
 from utils.rcon import rcon_manager
-from utils.json_engine import get_categories_data
+from utils.sqlite_storage import get_categories_data
 
 minecraft_inventory_router = Router()
 minecraft_inventory_router.callback_query(MinecraftShopCallback)
@@ -38,7 +38,7 @@ async def show_inventory(callback: CallbackQuery, state: FSMContext):
     #     return
     
     inventory = get_user_inventory(user_id)
-    categories = get_categories_data()
+    categories = await get_categories_data()
     
     if not inventory:
         keyboard = await create_inventory_keyboard(user_id)
@@ -94,7 +94,7 @@ async def transfer_items_to_game(callback: CallbackQuery, state: FSMContext):
     #     return
     
 
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     minecraft_username = user_data.get('minecraft_username')
     
     if not minecraft_username:
@@ -119,9 +119,9 @@ async def process_minecraft_username(message: Message, state: FSMContext):
     user_id = message.from_user.id
     minecraft_username = message.text.strip()
     
-    user_data = get_user_data(user_id)
+    user_data = await get_user_data(user_id)
     user_data['minecraft_username'] = minecraft_username
-    update_user_data(user_id, user_data)
+    await update_user_data(user_id, user_data)
     
     # Clear the state
     await state.clear()
@@ -174,9 +174,9 @@ async def transfer_items_to_minecraft(message: Message, user_id: int, minecraft_
 
     else:
         await message.answer(f"❌ {err_text}", parse_mode=None)
-        user_data = get_user_data(user_id)
+        user_data = await get_user_data(user_id)
         user_data['inventory'] = inventory
-        update_user_data(user_id, user_data)
+        await update_user_data(user_id, user_data)
     
 
 

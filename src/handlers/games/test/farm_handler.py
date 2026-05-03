@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
-from utils.json_engine import get_user_data
+from utils.sqlite_storage import get_user_data
 from .farm_game import FarmGame
 
 # Initialize router
@@ -12,7 +12,7 @@ farm_router = Router()
 @farm_router.message(Command("farm"))
 async def farm_command(message: Message, state: FSMContext):
     """Handle the /farm command to show the farm."""
-    user_data = get_user_data(str(message.from_user.id))
+    user_data = await get_user_data(message.from_user.id)
     
     # Initialize farm data if not exists
     if 'farm_data' not in user_data:
