@@ -266,7 +266,7 @@ async def buy_item(callback: CallbackQuery, state: FSMContext, callback_data: Mi
     season_counts[item_key] = previous_purchases + quantity
     await update_user_data(user_id, user_data)
     
-    add_item_to_inventory(user_id, category_id, item_id, quantity)
+    await add_item_to_inventory(user_id, category_id, item_id, quantity)
     
     currency_text = "рублей" if currency == "rub" else "BC"
     await callback.answer(f"✅ Успешно куплено {quantity}x {item['name']} за {format_money(total_price)} {currency_text}")

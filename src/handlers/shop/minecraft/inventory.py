@@ -37,7 +37,7 @@ async def show_inventory(callback: CallbackQuery, state: FSMContext):
     #     await callback.answer("Эта кнопка не для вас!")
     #     return
     
-    inventory = get_user_inventory(user_id)
+    inventory = await get_user_inventory(user_id)
     categories = await get_categories_data()
     
     if not inventory:
@@ -101,14 +101,14 @@ async def transfer_items_to_game(callback: CallbackQuery, state: FSMContext):
         await request_user_minecraft_username(callback, state)
         return
     
-    inventory = get_user_inventory(user_id)
+    inventory = await get_user_inventory(user_id)
     if not inventory:
         await callback.answer("Ваш инвентарь пуст!")
         return
 
 
 
-    clear_user_inventory(user_id)
+    await clear_user_inventory(user_id)
     await callback.answer("Отправка предметов в игру...")
     await transfer_items_to_minecraft(callback.message, user_id,minecraft_username, inventory)
     
