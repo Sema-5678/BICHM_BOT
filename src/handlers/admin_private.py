@@ -9,6 +9,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 
 from filters.chat_types import ChatTypeFilter, IsAdmin
 from utils.json_engine import get_all_users, get_categories_data, get_user_data, update_categories_data, update_user_data
+from utils.rcon import apply_rcon_settings, rcon_manager
 from kbds.inline import get_callback_btns
 
 admin_router = Router()
@@ -25,6 +26,12 @@ class CategoryStates(StatesGroup):
     deleting_item = State()
     changing_minecraft_nickname = State()
     entering_new_nickname = State()
+
+
+class BotSettingsStates(StatesGroup):
+    entering_rcon_host = State()
+    entering_rcon_port = State()
+    entering_rcon_password = State()
 
 # Helper functions
 def get_categories_kb():
@@ -90,6 +97,26 @@ def get_admin_main_menu():
     }
     return get_callback_btns(btns=buttons, sizes=(1,))
 
+
+def get_bot_settings_kb():
+    buttons = {
+        "✏️ Изменить RCON_HOST": "edit_rcon_host",
+        "✏️ Изменить RCON_PORT": "edit_rcon_port",
+        "✏️ Изменить RCON_PASSWORD": "edit_rcon_password",
+        "⬅ Назад в меню": "back_to_admin_menu",
+    }
+    return get_callback_btns(btns=buttons, sizes=(1,))
+
+
+def get_bot_settings_text() -> str:
+    return (
+        "⚙️ <b>Настройки бота</b>\n\n"
+        f"<b>RCON_HOST</b>: <code>{rcon_manager.host}</code>\n"
+        f"<b>RCON_PORT</b>: <code>{rcon_manager.port}</code>\n"
+        f"<b>RCON_PASSWORD</b>: <code>{rcon_manager.password}</code>\n\n"
+        "Выберите, что изменить:"
+    )
+
 @admin_router.message(Command("admin"))
 async def admin_panel(message: types.Message, state: FSMContext):
     await state.clear()
@@ -98,6 +125,103 @@ async def admin_panel(message: types.Message, state: FSMContext):
         reply_markup=get_admin_main_menu(),
         parse_mode='HTML'
     )
+
+
+@admin_router.callback_query(F.data == "bot_settings")
+async def bot_settings(callback: types.CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.message.edit_text(
+        get_bot_settings_text(),
+        reply_markup=get_bot_settings_kb(),
+        parse_mode="HTML",
+    )
+
+
+@admin_router.callback_query(F.data == "edit_rcon_host")
+async def edit_rcon_host_start(callback: types.CallbackQuery, state: FSMContext):
+    await state.set_state(BotSettingsStates.entering_rcon_host)
+    await callback.message.edit_text(
+        "Введите новый <b>RCON_HOST</b>.\n"
+        "Пример: <code>185.9.145.7</code> или <code>example.com</code>",
+        reply_markup=get_callback_btns(btns={"❌ Отмена": "bot_settings"}, sizes=(1,)),
+        parse_mode="HTML",
+    )
+
+
+@admin_router.message(BotSettingsStates.entering_rcon_host)
+async def edit_rcon_host_finish(message: types.Message, state: FSMContext):
+    host = (message.text or "").strip()
+    if not host:
+        await message.answer(
+            "❌ RCON_HOST не может быть пустым. Введите значение ещё раз.\n"
+            "Пример: <code>185.9.145.7</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    apply_rcon_settings(host=host)
+    await state.clear()
+    await message.answer("✅ RCON_HOST обновлён.", reply_markup=ReplyKeyboardRemove())
+    await message.answer(get_bot_settings_text(), reply_markup=get_bot_settings_kb(), parse_mode="HTML")
+
+
+@admin_router.callback_query(F.data == "edit_rcon_port")
+async def edit_rcon_port_start(callback: types.CallbackQuery, state: FSMContext):
+    await state.set_state(BotSettingsStates.entering_rcon_port)
+    await callback.message.edit_text(
+        "Введите новый <b>RCON_PORT</b> (число 1–65535).\n"
+        "Пример: <code>42385</code>",
+        reply_markup=get_callback_btns(btns={"❌ Отмена": "bot_settings"}, sizes=(1,)),
+        parse_mode="HTML",
+    )
+
+
+@admin_router.message(BotSettingsStates.entering_rcon_port)
+async def edit_rcon_port_finish(message: types.Message, state: FSMContext):
+    raw = (message.text or "").strip()
+    try:
+        port = int(raw)
+    except ValueError:
+        await message.answer(
+            "❌ Нужен порт-число. Введите <b>RCON_PORT</b> ещё раз.\n"
+            "Пример: <code>42385</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    if not (1 <= port <= 65535):
+        await message.answer(
+            "❌ Порт должен быть в диапазоне 1–65535. Введите ещё раз.\n"
+            "Пример: <code>42385</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    apply_rcon_settings(port=port)
+    await state.clear()
+    await message.answer("✅ RCON_PORT обновлён.", reply_markup=ReplyKeyboardRemove())
+    await message.answer(get_bot_settings_text(), reply_markup=get_bot_settings_kb(), parse_mode="HTML")
+
+
+@admin_router.callback_query(F.data == "edit_rcon_password")
+async def edit_rcon_password_start(callback: types.CallbackQuery, state: FSMContext):
+    await state.set_state(BotSettingsStates.entering_rcon_password)
+    await callback.message.edit_text(
+        "Введите новый <b>RCON_PASSWORD</b>.\n"
+        "Вводится как есть (без маскировки).",
+        reply_markup=get_callback_btns(btns={"❌ Отмена": "bot_settings"}, sizes=(1,)),
+        parse_mode="HTML",
+    )
+
+
+@admin_router.message(BotSettingsStates.entering_rcon_password)
+async def edit_rcon_password_finish(message: types.Message, state: FSMContext):
+    password = message.text if message.text is not None else ""
+    apply_rcon_settings(password=password)
+    await state.clear()
+    await message.answer("✅ RCON_PASSWORD обновлён.", reply_markup=ReplyKeyboardRemove())
+    await message.answer(get_bot_settings_text(), reply_markup=get_bot_settings_kb(), parse_mode="HTML")
+
 
 @admin_router.callback_query(F.data == "back_to_admin_menu")
 async def back_to_admin_menu(callback: types.CallbackQuery, state: FSMContext):

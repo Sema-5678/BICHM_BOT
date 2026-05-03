@@ -1,5 +1,6 @@
 import asyncio
 import os
+import logging
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums import ParseMode
@@ -34,6 +35,28 @@ from python_socks._errors import ProxyError
 
 
 from aiogram.types import Message
+
+
+def _get_proxy_url() -> str | None:
+    proxy_url = os.getenv("PROXY_URL") or os.getenv("PROXY")
+    if proxy_url:
+        return proxy_url.strip()
+    return None
+
+
+def build_bot(proxy_url: str | None = None) -> Bot:
+    if proxy_url:
+        session = AiohttpSession(proxy=proxy_url)
+        return Bot(
+            token=os.getenv('TOKEN'),
+            default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+            session=session,
+        )
+
+    return Bot(
+        token=os.getenv('TOKEN'),
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+    )
 
 def patch_message_methods(
     retries: int = 3,
@@ -95,7 +118,7 @@ def patch_message_methods(
 
 
 
-bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot: Bot | None = None
 
 # ALLOWED_UPDATES = ['message', 'edited_message', 'callback_query']
 
@@ -103,8 +126,7 @@ bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=Pars
 # bot.my_admins_list = []
 
 # Настраиваем логирование
-logger = setup_logging(bot, enable_telegram_logging=config.ENABLE_TELEGRAM_LOGGING, backupCount=config.BACKUP_COUNT, maxBytes=config.MAX_BYTES)
-patch_message_methods()
+logger = logging.getLogger(__name__)
 
 
 dp = Dispatcher()
@@ -146,6 +168,7 @@ async def on_shutdown(bot):
 
 
 async def main():
+    global bot, logger
     # from handlers.user_private import user_private_router
     # from handlers.games import games_router
     # from handlers.bank_handlers import bank_router
@@ -168,6 +191,37 @@ async def main():
 
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
+
+    bot = build_bot()
+    logger = setup_logging(
+        bot,
+        enable_telegram_logging=config.ENABLE_TELEGRAM_LOGGING,
+        backupCount=config.BACKUP_COUNT,
+        maxBytes=config.MAX_BYTES,
+    )
+    patch_message_methods()
+
+    try:
+        await bot.get_me()
+    except (ProxyError, ClientConnectorError, TelegramNetworkError, TelegramAPIError, asyncio.TimeoutError, ClientOSError):
+        proxy_url = _get_proxy_url()
+        if not proxy_url:
+            raise
+
+        try:
+            await bot.session.close()
+        except Exception:
+            pass
+
+        bot = build_bot(proxy_url=proxy_url)
+        logger = setup_logging(
+            bot,
+            enable_telegram_logging=config.ENABLE_TELEGRAM_LOGGING,
+            backupCount=config.BACKUP_COUNT,
+            maxBytes=config.MAX_BYTES,
+        )
+        patch_message_methods()
+        await bot.get_me()
 
     await bot.delete_webhook(drop_pending_updates=True)
     

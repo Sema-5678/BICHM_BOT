@@ -82,8 +82,27 @@ class RconManager:
 
 
 rcon_manager = RconManager(
-        host=Config.RCON_HOST,
-        port=Config.RCON_PORT,
-        password=Config.RCON_PASSWORD
+        host=(Config.RCON_HOST or "").strip(),
+        port=(int(Config.RCON_PORT) if str(Config.RCON_PORT).isdigit() else 25575),
+        password=(Config.RCON_PASSWORD or "")
     )
+
+
+def _safe_int(value, default: int) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def apply_rcon_settings(host: str | None = None, port: int | str | None = None, password: str | None = None) -> None:
+    """
+    Обновляет настройки глобального rcon_manager в оперативке (без сохранения на диск).
+    """
+    if host is not None:
+        rcon_manager.host = str(host).strip()
+    if port is not None:
+        rcon_manager.port = _safe_int(port, rcon_manager.port)
+    if password is not None:
+        rcon_manager.password = str(password)
 
