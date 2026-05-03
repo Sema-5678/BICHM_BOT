@@ -16,7 +16,37 @@ def _default_sqlite_url() -> str:
     return f"sqlite+aiosqlite:///{db_path.as_posix()}"
 
 
+def _normalize_sqlite_url(url: str) -> str:
+    """
+    Ensures that for file-based sqlite URLs:
+    - path is absolute (anchored at repo root if relative)
+    - parent directory exists
+    """
+    prefix = "sqlite+aiosqlite:///"
+    if not url.startswith(prefix):
+        return url
+
+    raw_path = url[len(prefix) :]
+    if raw_path in {":memory:", ""}:
+        return url
+
+    repo_root = Path(__file__).resolve().parents[2]
+
+    if raw_path.startswith("./") or raw_path.startswith(".\\"):
+        path = repo_root / raw_path[2:]
+    else:
+        candidate = Path(raw_path)
+        if candidate.is_absolute() or (len(raw_path) >= 3 and raw_path[1:3] == ":/"):
+            path = candidate
+        else:
+            path = repo_root / raw_path
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return f"{prefix}{path.as_posix()}"
+
+
 DB_URL = os.getenv("DB_LITE") or os.getenv("DB_URL") or _default_sqlite_url()
+DB_URL = _normalize_sqlite_url(DB_URL)
 
 engine = create_async_engine(DB_URL, echo=False)
 session_maker = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
@@ -35,4 +65,3 @@ async def drop_db() -> None:
 async def get_session() -> AsyncIterator[AsyncSession]:
     async with session_maker() as session:
         yield session
-

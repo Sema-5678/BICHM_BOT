@@ -50,6 +50,14 @@ async def orm_update_user_fields(session: AsyncSession, user_id: int, **fields: 
     await session.commit()
 
 
+async def orm_delete_user(session: AsyncSession, user_id: int) -> None:
+    user = await orm_get_user(session, user_id)
+    if user is None:
+        return
+    await session.delete(user)
+    await session.commit()
+
+
 async def orm_get_singleton(session: AsyncSession, key: str) -> dict[str, Any]:
     result = await session.execute(select(SingletonKV).where(SingletonKV.key == key))
     row = result.scalar_one_or_none()
@@ -66,6 +74,15 @@ async def orm_set_singleton(session: AsyncSession, key: str, value: dict[str, An
     await session.commit()
 
 
+async def orm_delete_singleton(session: AsyncSession, key: str) -> None:
+    result = await session.execute(select(SingletonKV).where(SingletonKV.key == key))
+    row = result.scalar_one_or_none()
+    if row is None:
+        return
+    await session.delete(row)
+    await session.commit()
+
+
 async def orm_get_admins_ids(session: AsyncSession) -> list[int]:
     data = await orm_get_singleton(session, "admins_data")
     ids = data.get("admins_ids", [])
@@ -74,4 +91,3 @@ async def orm_get_admins_ids(session: AsyncSession) -> list[int]:
 
 async def orm_set_admins_ids(session: AsyncSession, admin_ids: list[int]) -> None:
     await orm_set_singleton(session, "admins_data", {"admins_ids": [int(x) for x in admin_ids]})
-
