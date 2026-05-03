@@ -56,6 +56,18 @@ async def create_db() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+        if engine.url.get_backend_name() == "sqlite":
+            cols = set()
+            try:
+                result = await conn.exec_driver_sql("PRAGMA table_info(users)")
+                for row in result:
+                    cols.add(row[1])
+            except Exception:
+                cols = set()
+
+            if "minecraft_username" not in cols:
+                await conn.exec_driver_sql("ALTER TABLE users ADD COLUMN minecraft_username VARCHAR(16)")
+
 
 async def drop_db() -> None:
     async with engine.begin() as conn:

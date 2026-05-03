@@ -40,6 +40,7 @@ class User(Base):
 
     getbc_time: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
     username: Mapped[str] = mapped_column(String(64), default="", nullable=False)
+    minecraft_username: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
     date_create: Mapped[int] = mapped_column(BigInteger, nullable=False)
     date_update: Mapped[int] = mapped_column(BigInteger, nullable=False)
@@ -65,4 +66,3 @@ class SingletonKV(Base):
 
     key: Mapped[str] = mapped_column(String(64), primary_key=True)
     value: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
-
