@@ -1,7 +1,9 @@
 import asyncio
 from decimal import Decimal
 import os
-from utils.json_engine import get_all_users, update_user_data
+import random
+from utils.json_engine import get_all_users, update_user_data, get_farm_data, update_farm_data
+import random
 from config import (
     INTEREST_CREDIT_RATE_day, 
     INTEREST_DEPOSIT_RATE_day, 
@@ -62,38 +64,6 @@ async def process_interest():
 
 
             
-# class InterestScheduler:
-#     def __init__(self, timezone: str = "Europe/Moscow", jobs: list = None):
-#         self.scheduler: AsyncIOScheduler | None = None
-#         self.timezone = timezone
-#         self.jobs = jobs
-
-#     async def start(self):
-#         if self.scheduler and self.scheduler.running:
-#             return  # уже запущен
-
-#         self.scheduler = AsyncIOScheduler(timezone=self.timezone)
-#         if self.jobs:
-#             for job in self.jobs:
-#                 self.scheduler.add_job(**job)
-#         else:
-#             logger.warning("Нет задач для запуска")
-#             return
-#         # self.scheduler.add_job(
-#         #     process_interest,
-#         #     "cron",
-#         #     hour=10,
-#         #     minute=0,
-#         # )
-#         self.scheduler.start()
-#         logger.info("✅ InterestScheduler запущен")
-
-#     async def stop(self):
-#         if self.scheduler and self.scheduler.running:
-#             self.scheduler.shutdown(wait=False)
-#             logger.info("⚠ InterestScheduler остановлен")
-
-            
 
 
 async def send_monthly_reset_notification(bot: Bot):
@@ -134,11 +104,28 @@ async def send_monthly_reset_notification(bot: Bot):
 
 
 async def reset_minecraft_season():
-    """Сбрасывает данные сезона Minecraft и баланс пользователей"""
+    """
+    Сбрасывает данные сезона Minecraft, баланс пользователей
+    и обновляет поле мини-фермы
+    """
     logger.info("Сбрасываю данные сезона Minecraft и баланс для всех пользователей")
+
+    # Обновляем поле мини-фермы
+    # try:
+    #     farm_data = get_farm_data()
+    #     if farm_data and 'fields' in farm_data and farm_data['fields'] and 'curr_field' in farm_data:
+    #         # Выбираем случайное поле из доступных
+    #         new_field = random.choice(farm_data['fields'])
+    #         farm_data['curr_field'] = new_field
+    #         update_farm_data(farm_data)
+    #         logger.info("Mini-farm field updated successfully")
+    # except Exception as e:
+    #     logger.error(f"Error updating mini-farm field: {e}")
+    
+    # Сбрасываем баланс пользователей
     users = get_all_users()
     
-    for user_id, user_data in users:
+    for index, (user_id, user_data) in enumerate(users):
         try:
             # Сбрасываем данные сезона
             if 'minecraft_goods_count_season' in user_data:
@@ -150,6 +137,9 @@ async def reset_minecraft_season():
             
             # Сохраняем изменения
             update_user_data(user_id, user_data)
+
+            if index % 10 == 0:
+                await asyncio.sleep(0.1)
             
         except Exception as e:
             logger.exception(f"Ошибка при сбросе данных сезона для пользователя {user_id}: {e}")

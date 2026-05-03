@@ -531,12 +531,15 @@ def compute_adjusted_win_probability(user_id: int, chat_id,  base_probability: f
     # print(chat_bonus, chat_id, '-1002988477375'==str(chat_id))
 
 
-    user_data = get_user_data(user_id)
-    all_balance = user_data["balance"] + user_data["deposit"]
-    user_chance_percent = win_chance(all_balance)  # 0..100
+    # user_data = get_user_data(user_id)
+    # all_balance = user_data["balance"] + user_data["deposit"]
+    # user_chance_percent = win_chance(all_balance)  # 0..100
+    adjusted = base_probability * chat_bonus
+
+
     # Neutral point is 50%. Above 50 increases odds, below decreases
-    factor = user_chance_percent * Decimal("0.02")
-    adjusted = base_probability * factor * chat_bonus
+    # factor = user_chance_percent * Decimal("0.02")
+    # adjusted = base_probability * factor * chat_bonus
     if adjusted < 0:
         return 0
     if adjusted > 1:

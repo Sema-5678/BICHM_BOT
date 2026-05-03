@@ -2,11 +2,11 @@ from decimal import Decimal, ROUND_HALF_UP
 import json
 import os
 import time
-from config import MAX_BALANCE, START_BALANCE, MIN_POSITIVE_NUM, database_path, FILL_MISSING_DEFAULTS
+from config import MAX_BALANCE, START_BALANCE, MIN_POSITIVE_NUM, FarmConfig, database_path, FILL_MISSING_DEFAULTS
+import logging
+logger = logging.getLogger(__name__)
 
-
-
-balance_list = ['balance', 'debt', 'deposit', 'min_deposit', 'max_loan', 'rub_balance']
+balance_list = ['balance', 'debt', 'deposit', 'min_deposit', 'max_loan', 'rub_balance', 'farm_minigame.fc_balance']
 class DecimalEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Decimal):
@@ -30,8 +30,21 @@ def _ensure_defaults(data, defaults):
                 changed = True
     return changed
 
+
+
+ # Функция для получения 3x3 матрицы из левого нижнего угла текущего поля
+def get_initial_field():
+        return [
+            [{"plant": None, "status": None}, {"plant": None, "status": None}, {"plant": None, "status": None}],
+            [{"plant": None, "status": None}, {"plant": None, "status": None}, {"plant": None, "status": None}],
+            [{"plant": None, "status": None}, {"plant": None, "status": None}, {"plant": None, "status": None}]
+        ]
+  
+
 def get_user_data(user_id, data_key=None):
     filename = os.path.join(users_dir, f'{user_id}.json')
+    
+   
     
     default_data = {
         "balance": f"{START_BALANCE}",
@@ -48,6 +61,16 @@ def get_user_data(user_id, data_key=None):
         'inventory': {},
         "minecraft_goods_count_season": {},
         "rub_balance": "0.0",
+        "farm_minigame": {
+            'field': get_initial_field(),  # Динамически получаем начальное поле
+            'fc_balance': 0,
+            'last_care_day': None,
+            'missed_days': 0,
+            'field_size': FarmConfig.INITIAL_FIELD_SIZE,
+            'inventory': {},
+            'boosts': {},
+            "last_visit": int(time.time()),
+        },
         # Убрали last_interest_update - он не используется
     }
     
@@ -60,7 +83,10 @@ def get_user_data(user_id, data_key=None):
     
     # Конвертируем строки в Decimal
     for key in balance_list:
-        if isinstance(data.get(key), str):
+        if '.' in key:
+            k1, k2 = key.split('.')
+            data[k1][k2] = Decimal(data[k1][k2])
+        elif isinstance(data.get(key), str):
             data[key] = Decimal(data[key])
     
     # print(data)
@@ -79,7 +105,18 @@ def update_user_data(user_id, data):
     
     # Округляем и конвертируем Decimal в строки
     for key in balance_list:
-        data_num = data_to_save.get(key)
+        if '.' in key:
+            # data_to_save = data_to_save[key.split('.')[0]]
+            # key = key.split('.')[1]
+            k1, k2 = key.split('.')
+            # data_to_save[k1][k2] = Decimal(data_to_save[k1][k2])
+            data_num = data_to_save[k1][k2]
+
+
+        else:
+            data_num = data_to_save.get(key)
+
+
         if isinstance(data_num, Decimal):
             if data_num < 0:
                 print('баланс в минусе')
@@ -90,7 +127,11 @@ def update_user_data(user_id, data):
 
        
             rounded = data_num.quantize(MIN_POSITIVE_NUM, rounding=ROUND_HALF_UP)
-            data_to_save[key] = str(rounded)
+
+            if '.' in key:
+                data_to_save[k1][k2] = str(rounded)
+            else:
+                data_to_save[key] = str(rounded)
     
     update_file(filename, data_to_save)
 
@@ -113,6 +154,20 @@ def get_categories_data():
 
 def update_categories_data(data):
     filename = 'minecraft_goods.json'
+    update_file(filename, data)
+
+
+
+
+
+
+def get_farm_data():
+    filename = 'mini_game_farm.json'
+    return get_data(filename, {})
+
+
+def update_farm_data(data):
+    filename = 'mini_game_farm.json'
     update_file(filename, data)
 
 

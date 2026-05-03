@@ -6,7 +6,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from config import BASE_ROBBERY_CHANCE, ROBBERY_ITEMS_PER_ROW
+from config import BASE_ROBBERY_CHANCE, BASE_ROBBERY_PAYOUT, ROBBERY_ITEMS_PER_ROW
 from filters.chat_types import ChatTypeFilter
 from handlers.components.functions import (
     add_crew_member,
@@ -43,14 +43,13 @@ async def robbery_start(message: Message):
     if not await check_is_valid_num(message, bet):
         return
     old_balance = get_user_balance(message.from_user.id)
-    new_balance = deduct_money(message.from_user.id, bet)
-    payout_multiplier = 2.2
+    # payout_multiplier = 2.2
     text = TEXTS["games"]["robbery"]["start"].format(
         bet=format_money(bet),
         old_balance=format_money(old_balance),
-        new_balance=format_money(new_balance),
+        new_balance=format_money(old_balance - bet),
         base=f"{BASE_ROBBERY_CHANCE*100:.2f}",
-        multiplier=payout_multiplier,
+        multiplier=BASE_ROBBERY_PAYOUT,
     )
     keyboard = InlineKeyboardBuilder()
     for idx, member in enumerate(ROBBERY_CHANCES):
@@ -85,7 +84,9 @@ async def robbery_handler(callback: CallbackQuery, callback_data: RobberyCallbac
         return
 
     if callback_data.action == "start":
-        await callback.message.edit_text(callback.message.text)
+        # await callback.message.edit_text(callback.message.text)
+        new_balance = deduct_money(callback_data.user_id, Decimal(callback_data.bet))
+
 
         
         success_chance, multiplier = calculate_robbery_chance(callback_data.crew)

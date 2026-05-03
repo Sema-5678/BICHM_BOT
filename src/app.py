@@ -103,7 +103,7 @@ bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=Pars
 # bot.my_admins_list = []
 
 # Настраиваем логирование
-logger = setup_logging(bot, enable_telegram_logging=config.ENABLE_TELEGRAM_LOGGING)
+logger = setup_logging(bot, enable_telegram_logging=config.ENABLE_TELEGRAM_LOGGING, backupCount=config.BACKUP_COUNT, maxBytes=config.MAX_BYTES)
 patch_message_methods()
 
 
