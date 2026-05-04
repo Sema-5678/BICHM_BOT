@@ -24,6 +24,8 @@ Optional limits:
 uvicorn api.main:app --app-dir src --host 127.0.0.1 --port 8000
 ```
 
+The service loads `.env` automatically on startup (via `python-dotenv`).
+
 ## Endpoints
 
 Header: `X-API-Key: <API_KEY>`

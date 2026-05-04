@@ -112,6 +112,12 @@ async def _startup() -> None:
         level=logging.INFO,
         format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
     )
+    try:
+        from dotenv import find_dotenv, load_dotenv  # type: ignore
+    except Exception:
+        logger.warning("python-dotenv is not available; .env will not be loaded")
+    else:
+        load_dotenv(find_dotenv())
     await create_db()
 
 
@@ -137,4 +143,3 @@ async def change_balance_rub(
     payload: BalanceChangeIn = ...,
 ) -> BalanceChangeOut:
     return await _apply_change(telegram_id, field_name="rub_balance", currency="RUB", payload=payload)
-
