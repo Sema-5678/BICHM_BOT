@@ -114,22 +114,14 @@ def main() -> int:
     rub1 = api.post(f"/v1/users/{tg}/balance/rub", {"amount": "2.00", "mode": "delta"}, auth=True)
     _assert(rub1["currency"] == "RUB", "RUB endpoint wrong currency")
 
-    log.info("6) inventory add/remove/clear")
-    api.post(f"/v1/users/{tg}/inventory/clear", {}, auth=True)
+    log.info("6) inventory add/remove")
     api.post(f"/v1/users/{tg}/inventory/add", {"category_id": "1", "item_id": "10", "quantity": 3}, auth=True)
     inv = api.get(f"/v1/users/{tg}/inventory", auth=True)["inventory"]
     _assert(inv.get("1_10") == 3, "inventory add failed")
     api.post(f"/v1/users/{tg}/inventory/remove", {"category_id": "1", "item_id": "10", "quantity": 2}, auth=True)
     inv = api.get(f"/v1/users/{tg}/inventory", auth=True)["inventory"]
     _assert(inv.get("1_10") == 1, "inventory remove failed")
-    api.post(f"/v1/users/{tg}/inventory/clear", {}, auth=True)
-    inv = api.get(f"/v1/users/{tg}/inventory", auth=True)["inventory"]
-    _assert(inv == {}, "inventory clear failed")
-
-    log.info("7) farm reset + verify")
-    api.post(f"/v1/users/{tg}/farm/reset", {"confirm": True}, auth=True)
-    farm = api.get(f"/v1/users/{tg}/farm", auth=True)["farm_minigame"]
-    _assert(isinstance(farm, dict) and farm.get("field_size") == 3, "farm reset failed")
+    log.info("7) farm endpoints are disabled (skip)")
 
     log.info("8) list/search endpoints")
     users = api.get("/v1/users?limit=5&offset=0&sort=date_update&order=desc", auth=True)
@@ -178,4 +170,3 @@ if __name__ == "__main__":
     except Exception as e:
         logging.getLogger("api_smoke_test").exception("FAILED: %s", e)
         raise
-

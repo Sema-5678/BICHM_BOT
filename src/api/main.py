@@ -463,6 +463,9 @@ async def get_user_inventory_api(telegram_id: int = Path(..., ge=1)) -> Inventor
     dependencies=[Depends(_require_api_key)],
 )
 async def get_user_farm_api(telegram_id: int = Path(..., ge=1)) -> FarmOut:
+    raise HTTPException(status_code=403, detail="Farm API is temporarily disabled")
+
+
     async with session_maker() as session:
         result = await session.execute(select(User).where(User.id == telegram_id))
         user = result.scalar_one_or_none()
@@ -552,6 +555,8 @@ async def inventory_remove(
     dependencies=[Depends(_require_api_key)],
 )
 async def inventory_clear(telegram_id: int = Path(..., ge=1)) -> InventoryOut:
+    raise HTTPException(status_code=403, detail="Inventory clear endpoint is temporarily disabled")
+
     async with session_maker() as session:
         await orm_get_or_create_user(session, telegram_id)
         inv: dict[str, Any] = {}
@@ -568,6 +573,9 @@ async def farm_reset(
     telegram_id: int = Path(..., ge=1),
     confirm: bool = Body(False, embed=True),
 ) -> FarmOut:
+    raise HTTPException(status_code=403, detail="Farm API is temporarily disabled")
+
+
     if confirm is not True:
         raise HTTPException(status_code=422, detail="confirm=true is required")
     async with session_maker() as session:

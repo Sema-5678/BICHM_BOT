@@ -44,19 +44,21 @@ Remove RUB -55.10:
 irm -Method Post "$env:API_BASE_URL/v1/users/$env:TG_ID/balance/rub" -Headers @{ "X-API-Key" = $env:API_KEY } -ContentType "application/json" -Body '{"amount":"-55.10","mode":"delta"}'
 ```
 
-Reset farm (confirm required):
+Farm endpoints (temporarily disabled):
 
 ```powershell
+# disabled for now (will return 403)
 irm -Method Post "$env:API_BASE_URL/v1/users/$env:TG_ID/farm/reset" -Headers @{ "X-API-Key" = $env:API_KEY } -ContentType "application/json" -Body '{"confirm":true}'
 irm "$env:API_BASE_URL/v1/users/$env:TG_ID/farm" -Headers @{ "X-API-Key" = $env:API_KEY }
 ```
 
-Inventory add/remove/clear:
+Inventory add/remove (clear is temporarily disabled):
 
 ```powershell
 irm -Method Post "$env:API_BASE_URL/v1/users/$env:TG_ID/inventory/add" -Headers @{ "X-API-Key" = $env:API_KEY } -ContentType "application/json" -Body '{"category_id":"1","item_id":"10","quantity":3}'
 irm "$env:API_BASE_URL/v1/users/$env:TG_ID/inventory" -Headers @{ "X-API-Key" = $env:API_KEY }
 irm -Method Post "$env:API_BASE_URL/v1/users/$env:TG_ID/inventory/remove" -Headers @{ "X-API-Key" = $env:API_KEY } -ContentType "application/json" -Body '{"category_id":"1","item_id":"10","quantity":2}'
+# disabled for now (will return 403)
 irm -Method Post "$env:API_BASE_URL/v1/users/$env:TG_ID/inventory/clear" -Headers @{ "X-API-Key" = $env:API_KEY } -ContentType "application/json" -Body '{}'
 ```
 
