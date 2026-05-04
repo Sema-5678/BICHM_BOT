@@ -361,41 +361,6 @@ async def change_balance_rub(
 
 
 @app.get(
-    "/v1/users/{telegram_id}",
-    response_model=UserCardOut,
-    dependencies=[Depends(_require_api_key)],
-)
-async def get_user(telegram_id: int = Path(..., ge=1)) -> UserCardOut:
-    async with session_maker() as session:
-        result = await session.execute(select(User).where(User.id == telegram_id))
-        user = result.scalar_one_or_none()
-        if user is None:
-            raise HTTPException(status_code=404, detail="User not found")
-        return _user_to_card(user)
-
-
-@app.get(
-    "/v1/users/{telegram_id}/balances",
-    response_model=UserBalancesOut,
-    dependencies=[Depends(_require_api_key)],
-)
-async def get_user_balances(telegram_id: int = Path(..., ge=1)) -> UserBalancesOut:
-    async with session_maker() as session:
-        result = await session.execute(select(User).where(User.id == telegram_id))
-        user = result.scalar_one_or_none()
-        if user is None:
-            raise HTTPException(status_code=404, detail="User not found")
-        return UserBalancesOut(
-            id=int(user.id),
-            balance=Decimal(str(user.balance)),
-            rub_balance=Decimal(str(user.rub_balance)),
-            deposit=Decimal(str(user.deposit)),
-            debt=Decimal(str(user.debt)),
-            credit_rating=int(user.credit_rating),
-        )
-
-
-@app.get(
     "/v1/users",
     response_model=UsersListOut,
     dependencies=[Depends(_require_api_key)],
@@ -441,6 +406,41 @@ async def search_users(
         result = await session.execute(stmt.offset(offset).limit(limit))
         items = [_user_to_card(u) for u in result.scalars().all()]
         return UsersListOut(items=items, limit=limit, offset=offset, total=int(total or 0))
+
+
+@app.get(
+    "/v1/users/{telegram_id}",
+    response_model=UserCardOut,
+    dependencies=[Depends(_require_api_key)],
+)
+async def get_user(telegram_id: int = Path(..., ge=1)) -> UserCardOut:
+    async with session_maker() as session:
+        result = await session.execute(select(User).where(User.id == telegram_id))
+        user = result.scalar_one_or_none()
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        return _user_to_card(user)
+
+
+@app.get(
+    "/v1/users/{telegram_id}/balances",
+    response_model=UserBalancesOut,
+    dependencies=[Depends(_require_api_key)],
+)
+async def get_user_balances(telegram_id: int = Path(..., ge=1)) -> UserBalancesOut:
+    async with session_maker() as session:
+        result = await session.execute(select(User).where(User.id == telegram_id))
+        user = result.scalar_one_or_none()
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        return UserBalancesOut(
+            id=int(user.id),
+            balance=Decimal(str(user.balance)),
+            rub_balance=Decimal(str(user.rub_balance)),
+            deposit=Decimal(str(user.deposit)),
+            debt=Decimal(str(user.debt)),
+            credit_rating=int(user.credit_rating),
+        )
 
 
 @app.get(
@@ -781,4 +781,3 @@ async def put_mini_game_farm(payload: dict[str, Any] = Body(...)) -> ConfigOut:
     async with session_maker() as session:
         await orm_set_singleton(session, "mini_game_farm", payload)
         return ConfigOut(key="mini_game_farm", value=payload)
-
