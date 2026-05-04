@@ -205,11 +205,8 @@
 
 
 - `GET /v1/config/minecraft_goods` — текущие товары/категории.
-- `PUT /v1/config/minecraft_goods` — залить новый конфиг целиком (валидировать).
-- `PATCH /v1/config/minecraft_goods` — точечные изменения (категория/элемент).
 
 - `GET /v1/config/mini_game_farm` — текущее “глобальное” поле.
-- `PUT /v1/config/mini_game_farm` — обновить (например, сменить `curr_field`).
 
 
 
