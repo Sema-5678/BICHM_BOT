@@ -71,3 +71,5 @@ python scripts/api_smoke_test.py --base-url http://127.0.0.1:8000 --api-key "<yo
 ```
 
 The script prints logs and fails fast on unexpected responses.
+
+Note: config write endpoints (`PUT/PATCH`) are currently disabled and will return `403`.

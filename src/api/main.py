@@ -713,6 +713,8 @@ async def get_minecraft_goods() -> ConfigOut:
     dependencies=[Depends(_require_api_key)],
 )
 async def put_minecraft_goods(payload: dict[str, Any] = Body(...)) -> ConfigOut:
+    raise HTTPException(status_code=403, detail="Config write endpoint is temporarily disabled")
+
     if not isinstance(payload, dict):
         raise HTTPException(status_code=422, detail="body must be an object")
     async with session_maker() as session:
@@ -726,6 +728,8 @@ async def put_minecraft_goods(payload: dict[str, Any] = Body(...)) -> ConfigOut:
     dependencies=[Depends(_require_api_key)],
 )
 async def patch_minecraft_goods(op: ConfigPatchOp) -> ConfigOut:
+    raise HTTPException(status_code=403, detail="Config write endpoint is temporarily disabled")
+
     async with session_maker() as session:
         goods = await orm_get_singleton(session, "minecraft_goods")
         if not isinstance(goods, dict):
@@ -792,6 +796,8 @@ async def get_mini_game_farm() -> ConfigOut:
     dependencies=[Depends(_require_api_key)],
 )
 async def put_mini_game_farm(payload: dict[str, Any] = Body(...)) -> ConfigOut:
+    raise HTTPException(status_code=403, detail="Config write endpoint is temporarily disabled")
+
     if not isinstance(payload, dict):
         raise HTTPException(status_code=422, detail="body must be an object")
     async with session_maker() as session:
