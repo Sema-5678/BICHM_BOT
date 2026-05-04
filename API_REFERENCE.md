@@ -24,6 +24,47 @@ $TG_ID = 5273608148
 
 PowerShell команды используют `irm` (`Invoke-RestMethod`).
 
+## Python examples (recommended)
+
+Ниже — примеры на Python без сторонних библиотек (только стандартная библиотека `urllib`).
+
+В начале можно определить базовые переменные и helper:
+
+```python
+import json
+import urllib.request
+import urllib.error
+
+BASE_URL = "https://bichmbot.mooo.com"
+API_KEY = "<PUT_YOUR_API_KEY_HERE>"
+TG_ID = 5273608148
+
+
+def api_request(method: str, path: str, body: dict | None = None, *, auth: bool = True):
+    url = BASE_URL.rstrip("/") + path
+    headers = {"Accept": "application/json"}
+    if auth:
+        headers["X-API-Key"] = API_KEY
+
+    data = None
+    if body is not None:
+        data = json.dumps(body).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+
+    req = urllib.request.Request(url, data=data, headers=headers, method=method)
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            raw = resp.read()
+            return json.loads(raw.decode("utf-8")) if raw else None
+    except urllib.error.HTTPError as e:
+        raw = e.read()
+        try:
+            payload = json.loads(raw.decode("utf-8")) if raw else {}
+        except Exception:
+            payload = {"raw": raw.decode("utf-8", errors="ignore")}
+        raise RuntimeError(f"{method} {path} -> {e.code}: {payload}") from None
+```
+
 ## Форматы данных
 
 ### Money / Decimal
@@ -47,6 +88,11 @@ PowerShell команды используют `irm` (`Invoke-RestMethod`).
 irm "$BASE_URL/health"
 ```
 
+Python:
+```python
+print(api_request("GET", "/health", auth=False))
+```
+
 Ответ (пример):
 ```json
 {"status":"ok"}
@@ -60,6 +106,11 @@ irm "$BASE_URL/health"
 irm "$BASE_URL/ready"
 ```
 
+Python:
+```python
+print(api_request("GET", "/ready", auth=False))
+```
+
 Ответ (пример):
 ```json
 {"db":"ok","migrations":"unknown"}
@@ -71,6 +122,11 @@ irm "$BASE_URL/ready"
 Запрос:
 ```powershell
 irm "$BASE_URL/version"
+```
+
+Python:
+```python
+print(api_request("GET", "/version", auth=False))
 ```
 
 Ответ (пример):
@@ -104,6 +160,16 @@ irm -Method Post "$BASE_URL/v1/users/$TG_ID/balance/bc" `
 {"user_id":5273608148,"currency":"BC","mode":"delta","amount":"10.50","new_balance":"123.45"}
 ```
 
+Python:
+```python
+resp = api_request(
+    "POST",
+    f"/v1/users/{TG_ID}/balance/bc",
+    {"amount": "10.50", "mode": "delta"},
+)
+print(resp)
+```
+
 ### `POST /v1/users/{telegram_id}/balance/rub`
 Назначение: изменить RUB.
 
@@ -120,6 +186,16 @@ irm -Method Post "$BASE_URL/v1/users/$TG_ID/balance/rub" `
 {"user_id":5273608148,"currency":"RUB","mode":"delta","amount":"-55.10","new_balance":"0.00"}
 ```
 
+Python:
+```python
+resp = api_request(
+    "POST",
+    f"/v1/users/{TG_ID}/balance/rub",
+    {"amount": "-55.10", "mode": "delta"},
+)
+print(resp)
+```
+
 ## 3) Users (read)
 
 Все эндпоинты этого раздела требуют `X-API-Key` и **не создают** пользователей автоматически.
@@ -130,6 +206,11 @@ irm -Method Post "$BASE_URL/v1/users/$TG_ID/balance/rub" `
 Запрос:
 ```powershell
 irm "$BASE_URL/v1/users/$TG_ID" -Headers @{ "X-API-Key" = $API_KEY }
+```
+
+Python:
+```python
+print(api_request("GET", f"/v1/users/{TG_ID}"))
 ```
 
 Ответ (пример):
@@ -158,6 +239,11 @@ irm "$BASE_URL/v1/users/$TG_ID" -Headers @{ "X-API-Key" = $API_KEY }
 irm "$BASE_URL/v1/users/$TG_ID/balances" -Headers @{ "X-API-Key" = $API_KEY }
 ```
 
+Python:
+```python
+print(api_request("GET", f"/v1/users/{TG_ID}/balances"))
+```
+
 Ответ (пример):
 ```json
 {"id":5273608148,"balance":"10.50","rub_balance":"0.00","deposit":"0.00","debt":"0.00","credit_rating":100}
@@ -169,6 +255,11 @@ irm "$BASE_URL/v1/users/$TG_ID/balances" -Headers @{ "X-API-Key" = $API_KEY }
 Запрос (пример):
 ```powershell
 irm "$BASE_URL/v1/users?limit=50&offset=0&sort=date_update&order=desc" -Headers @{ "X-API-Key" = $API_KEY }
+```
+
+Python:
+```python
+print(api_request("GET", "/v1/users?limit=50&offset=0&sort=date_update&order=desc"))
 ```
 
 Ответ (пример):
@@ -184,6 +275,11 @@ irm "$BASE_URL/v1/users?limit=50&offset=0&sort=date_update&order=desc" -Headers 
 irm "$BASE_URL/v1/users/search?id=$TG_ID&limit=5&offset=0" -Headers @{ "X-API-Key" = $API_KEY }
 ```
 
+Python:
+```python
+print(api_request("GET", f"/v1/users/search?id={TG_ID}&limit=5&offset=0"))
+```
+
 Ответ (пример):
 ```json
 {"items":[{...user_card...}],"limit":5,"offset":0,"total":1}
@@ -197,6 +293,11 @@ irm "$BASE_URL/v1/users/search?id=$TG_ID&limit=5&offset=0" -Headers @{ "X-API-Ke
 irm "$BASE_URL/v1/users/$TG_ID/inventory" -Headers @{ "X-API-Key" = $API_KEY }
 ```
 
+Python:
+```python
+print(api_request("GET", f"/v1/users/{TG_ID}/inventory"))
+```
+
 Ответ (пример):
 ```json
 {"id":5273608148,"inventory":{"1_10":1}}
@@ -208,6 +309,14 @@ irm "$BASE_URL/v1/users/$TG_ID/inventory" -Headers @{ "X-API-Key" = $API_KEY }
 Запрос:
 ```powershell
 irm "$BASE_URL/v1/users/$TG_ID/farm" -Headers @{ "X-API-Key" = $API_KEY }
+```
+
+Python:
+```python
+try:
+    print(api_request("GET", f"/v1/users/{TG_ID}/farm"))
+except RuntimeError as e:
+    print("Expected error:", e)
 ```
 
 Ответ:
@@ -238,6 +347,16 @@ irm -Method Patch "$BASE_URL/v1/users/$TG_ID" `
 
 Ответ: `UserCardOut` как в `GET /v1/users/{telegram_id}`.
 
+Python (set):
+```python
+print(api_request("PATCH", f"/v1/users/{TG_ID}", {"minecraft_username": "Steve"}))
+```
+
+Python (clear):
+```python
+print(api_request("PATCH", f"/v1/users/{TG_ID}", {"minecraft_username": None}))
+```
+
 ### `POST /v1/users/{telegram_id}/inventory/add`
 Назначение: добавить предмет в инвентарь.
 
@@ -252,6 +371,17 @@ irm -Method Post "$BASE_URL/v1/users/$TG_ID/inventory/add" `
 Ответ:
 ```json
 {"id":5273608148,"inventory":{"1_10":3}}
+```
+
+Python:
+```python
+print(
+    api_request(
+        "POST",
+        f"/v1/users/{TG_ID}/inventory/add",
+        {"category_id": "1", "item_id": "10", "quantity": 3},
+    )
+)
 ```
 
 ### `POST /v1/users/{telegram_id}/inventory/remove`
@@ -274,6 +404,17 @@ irm -Method Post "$BASE_URL/v1/users/$TG_ID/inventory/remove" `
 {"id":5273608148,"inventory":{"1_10":1}}
 ```
 
+Python:
+```python
+print(
+    api_request(
+        "POST",
+        f"/v1/users/{TG_ID}/inventory/remove",
+        {"category_id": "1", "item_id": "10", "quantity": 2},
+    )
+)
+```
+
 ### `POST /v1/users/{telegram_id}/inventory/clear` (временно отключено)
 Сейчас эндпоинт отключён и возвращает `403`.
 
@@ -288,6 +429,14 @@ irm -Method Post "$BASE_URL/v1/users/$TG_ID/inventory/clear" `
 Ответ:
 ```json
 {"detail":"Inventory clear endpoint is temporarily disabled"}
+```
+
+Python:
+```python
+try:
+    api_request("POST", f"/v1/users/{TG_ID}/inventory/clear", {})
+except RuntimeError as e:
+    print("Expected error:", e)
 ```
 
 ### `POST /v1/users/{telegram_id}/farm/reset` (временно отключено)
@@ -305,6 +454,11 @@ irm "$BASE_URL/v1/stats/users/count" -Headers @{ "X-API-Key" = $API_KEY }
 {"users":1234}
 ```
 
+Python:
+```python
+print(api_request("GET", "/v1/stats/users/count"))
+```
+
 ### `GET /v1/stats/balances/top`
 Запрос:
 ```powershell
@@ -313,6 +467,11 @@ irm "$BASE_URL/v1/stats/balances/top?limit=10" -Headers @{ "X-API-Key" = $API_KE
 Ответ:
 ```json
 {"items":[{"id":1,"total":"123.45","balance":"100.00","deposit":"23.45"}]}
+```
+
+Python:
+```python
+print(api_request("GET", "/v1/stats/balances/top?limit=10"))
 ```
 
 ### `GET /v1/stats/balances/summary`
@@ -325,6 +484,11 @@ irm "$BASE_URL/v1/stats/balances/summary" -Headers @{ "X-API-Key" = $API_KEY }
 {"bc":{"sum":"...","avg":"..."},"rub":{"sum":"...","avg":"..."},"deposit":{"sum":"...","avg":"..."},"debt":{"sum":"...","avg":"..."}}
 ```
 
+Python:
+```python
+print(api_request("GET", "/v1/stats/balances/summary"))
+```
+
 ### `GET /v1/stats/active`
 Запрос:
 ```powershell
@@ -335,6 +499,11 @@ irm "$BASE_URL/v1/stats/active?days=7" -Headers @{ "X-API-Key" = $API_KEY }
 {"days":7,"active_users":123}
 ```
 
+Python:
+```python
+print(api_request("GET", "/v1/stats/active?days=7"))
+```
+
 ### `GET /v1/stats/inventory/top-items`
 Запрос:
 ```powershell
@@ -343,6 +512,11 @@ irm "$BASE_URL/v1/stats/inventory/top-items?limit=50" -Headers @{ "X-API-Key" = 
 Ответ:
 ```json
 {"items":[{"item_key":"1_10","total_qty":999}]}
+```
+
+Python:
+```python
+print(api_request("GET", "/v1/stats/inventory/top-items?limit=50"))
 ```
 
 ## 6) Config (Singletons)
@@ -359,6 +533,11 @@ irm "$BASE_URL/v1/config/minecraft_goods" -Headers @{ "X-API-Key" = $API_KEY }
 {"key":"minecraft_goods","value":{...}}
 ```
 
+Python:
+```python
+print(api_request("GET", "/v1/config/minecraft_goods"))
+```
+
 ### `PUT /v1/config/minecraft_goods`
 Полная замена конфига.
 
@@ -366,6 +545,15 @@ irm "$BASE_URL/v1/config/minecraft_goods" -Headers @{ "X-API-Key" = $API_KEY }
 ```powershell
 $body = Get-Content -Raw ".\\data\\json_database\\minecraft_goods.json"
 irm -Method Put "$BASE_URL/v1/config/minecraft_goods" -Headers @{ "X-API-Key" = $API_KEY } -ContentType "application/json" -Body $body
+```
+
+Python:
+```python
+import json
+from pathlib import Path
+
+goods = json.loads(Path("data/json_database/minecraft_goods.json").read_text(encoding="utf-8"))
+print(api_request("PUT", "/v1/config/minecraft_goods", goods))
 ```
 
 ### `PATCH /v1/config/minecraft_goods`
@@ -379,10 +567,26 @@ irm -Method Patch "$BASE_URL/v1/config/minecraft_goods" `
   -Body '{"op":"set_item_field","category_id":"1","item_id":"10","field":"base_price","value":"100.00"}'
 ```
 
+Python:
+```python
+print(
+    api_request(
+        "PATCH",
+        "/v1/config/minecraft_goods",
+        {"op": "set_item_field", "category_id": "1", "item_id": "10", "field": "base_price", "value": "100.00"},
+    )
+)
+```
+
 ### `GET /v1/config/mini_game_farm`
 Запрос:
 ```powershell
 irm "$BASE_URL/v1/config/mini_game_farm" -Headers @{ "X-API-Key" = $API_KEY }
+```
+
+Python:
+```python
+print(api_request("GET", "/v1/config/mini_game_farm"))
 ```
 
 ### `PUT /v1/config/mini_game_farm`
@@ -392,3 +596,8 @@ $body = Get-Content -Raw ".\\data\\json_database\\mini_game_farm.json"
 irm -Method Put "$BASE_URL/v1/config/mini_game_farm" -Headers @{ "X-API-Key" = $API_KEY } -ContentType "application/json" -Body $body
 ```
 
+Python:
+```python
+farm = json.loads(Path("data/json_database/mini_game_farm.json").read_text(encoding="utf-8"))
+print(api_request("PUT", "/v1/config/mini_game_farm", farm))
+```
