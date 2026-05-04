@@ -8,7 +8,7 @@ From repo root:
 uvicorn api.main:app --app-dir src --host 127.0.0.1 --port 8000
 ```
 
-## 1) Quick manual checks (curl)
+## 1) Quick manual checks (PowerShell)
 
 Set env vars (PowerShell):
 
@@ -18,46 +18,46 @@ $env:API_KEY="<your-api-key>"
 $env:TG_ID="5273608148"
 ```
 
-Health:
+Health (PowerShell `Invoke-RestMethod`):
 
 ```powershell
-curl "$env:API_BASE_URL/health"
-curl "$env:API_BASE_URL/ready"
-curl "$env:API_BASE_URL/version"
+irm "$env:API_BASE_URL/health"
+irm "$env:API_BASE_URL/ready"
+irm "$env:API_BASE_URL/version"
 ```
 
 Get user card:
 
 ```powershell
-curl "$env:API_BASE_URL/v1/users/$env:TG_ID" -H "X-API-Key: $env:API_KEY"
+irm "$env:API_BASE_URL/v1/users/$env:TG_ID" -Headers @{ "X-API-Key" = $env:API_KEY }
 ```
 
 Add BC +10.50:
 
 ```powershell
-curl -X POST "$env:API_BASE_URL/v1/users/$env:TG_ID/balance/bc" -H "X-API-Key: $env:API_KEY" -H "Content-Type: application/json" -d "{\"amount\":\"10.50\",\"mode\":\"delta\"}"
+irm -Method Post "$env:API_BASE_URL/v1/users/$env:TG_ID/balance/bc" -Headers @{ "X-API-Key" = $env:API_KEY } -ContentType "application/json" -Body '{"amount":"10.50","mode":"delta"}'
 ```
 
 Remove RUB -55.10:
 
 ```powershell
-curl -X POST "$env:API_BASE_URL/v1/users/$env:TG_ID/balance/rub" -H "X-API-Key: $env:API_KEY" -H "Content-Type: application/json" -d "{\"amount\":\"-55.10\",\"mode\":\"delta\"}"
+irm -Method Post "$env:API_BASE_URL/v1/users/$env:TG_ID/balance/rub" -Headers @{ "X-API-Key" = $env:API_KEY } -ContentType "application/json" -Body '{"amount":"-55.10","mode":"delta"}'
 ```
 
 Reset farm (confirm required):
 
 ```powershell
-curl -X POST "$env:API_BASE_URL/v1/users/$env:TG_ID/farm/reset" -H "X-API-Key: $env:API_KEY" -H "Content-Type: application/json" -d "{\"confirm\":true}"
-curl "$env:API_BASE_URL/v1/users/$env:TG_ID/farm" -H "X-API-Key: $env:API_KEY"
+irm -Method Post "$env:API_BASE_URL/v1/users/$env:TG_ID/farm/reset" -Headers @{ "X-API-Key" = $env:API_KEY } -ContentType "application/json" -Body '{"confirm":true}'
+irm "$env:API_BASE_URL/v1/users/$env:TG_ID/farm" -Headers @{ "X-API-Key" = $env:API_KEY }
 ```
 
 Inventory add/remove/clear:
 
 ```powershell
-curl -X POST "$env:API_BASE_URL/v1/users/$env:TG_ID/inventory/add" -H "X-API-Key: $env:API_KEY" -H "Content-Type: application/json" -d "{\"category_id\":\"1\",\"item_id\":\"10\",\"quantity\":3}"
-curl "$env:API_BASE_URL/v1/users/$env:TG_ID/inventory" -H "X-API-Key: $env:API_KEY"
-curl -X POST "$env:API_BASE_URL/v1/users/$env:TG_ID/inventory/remove" -H "X-API-Key: $env:API_KEY" -H "Content-Type: application/json" -d "{\"category_id\":\"1\",\"item_id\":\"10\",\"quantity\":2}"
-curl -X POST "$env:API_BASE_URL/v1/users/$env:TG_ID/inventory/clear" -H "X-API-Key: $env:API_KEY"
+irm -Method Post "$env:API_BASE_URL/v1/users/$env:TG_ID/inventory/add" -Headers @{ "X-API-Key" = $env:API_KEY } -ContentType "application/json" -Body '{"category_id":"1","item_id":"10","quantity":3}'
+irm "$env:API_BASE_URL/v1/users/$env:TG_ID/inventory" -Headers @{ "X-API-Key" = $env:API_KEY }
+irm -Method Post "$env:API_BASE_URL/v1/users/$env:TG_ID/inventory/remove" -Headers @{ "X-API-Key" = $env:API_KEY } -ContentType "application/json" -Body '{"category_id":"1","item_id":"10","quantity":2}'
+irm -Method Post "$env:API_BASE_URL/v1/users/$env:TG_ID/inventory/clear" -Headers @{ "X-API-Key" = $env:API_KEY } -ContentType "application/json" -Body '{}'
 ```
 
 ## 2) Full smoke test script
@@ -69,4 +69,3 @@ python scripts/api_smoke_test.py --base-url http://127.0.0.1:8000 --api-key "<yo
 ```
 
 The script prints logs and fails fast on unexpected responses.
-
