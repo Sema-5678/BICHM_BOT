@@ -21,7 +21,7 @@ Optional limits:
 ## Run (separate service)
 
 ```powershell
-uvicorn api.main:app --host 127.0.0.1 --port 8000
+uvicorn api.main:app --app-dir src --host 127.0.0.1 --port 8000
 ```
 
 ## Endpoints
@@ -40,4 +40,3 @@ Body:
 `mode`:
 - `delta` — add/subtract
 - `set` — set absolute value
-
