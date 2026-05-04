@@ -623,10 +623,18 @@ async def stats_top(limit: int = Query(10, ge=1, le=100)) -> StatsTopOut:
 )
 async def stats_summary() -> StatsSummaryOut:
     async with session_maker() as session:
-        bc_sum, bc_avg = await session.one(select(func.sum(User.balance), func.avg(User.balance)))
-        rub_sum, rub_avg = await session.one(select(func.sum(User.rub_balance), func.avg(User.rub_balance)))
-        dep_sum, dep_avg = await session.one(select(func.sum(User.deposit), func.avg(User.deposit)))
-        debt_sum, debt_avg = await session.one(select(func.sum(User.debt), func.avg(User.debt)))
+        stmt = select(
+            func.sum(User.balance),
+            func.avg(User.balance),
+            func.sum(User.rub_balance),
+            func.avg(User.rub_balance),
+            func.sum(User.deposit),
+            func.avg(User.deposit),
+            func.sum(User.debt),
+            func.avg(User.debt),
+        )
+        result = await session.execute(stmt)
+        bc_sum, bc_avg, rub_sum, rub_avg, dep_sum, dep_avg, debt_sum, debt_avg = result.one()
 
         def agg(sum_v, avg_v) -> StatsAgg:
             return StatsAgg(
