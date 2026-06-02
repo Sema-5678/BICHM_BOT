@@ -14,12 +14,12 @@ def upgrade() -> None:
     op.create_table(
         "users",
         sa.Column("id", sa.BigInteger(), primary_key=True, autoincrement=False),
-        sa.Column("balance", sa.Numeric(15, 2), nullable=True),
-        sa.Column("debt", sa.Numeric(15, 2), nullable=True),
-        sa.Column("deposit", sa.Numeric(15, 2), nullable=True),
+        sa.Column("balance", sa.Numeric(15, 2), nullable=False),
+        sa.Column("debt", sa.Numeric(15, 2), nullable=False),
+        sa.Column("deposit", sa.Numeric(15, 2), nullable=False),
         sa.Column("credit_rating", sa.Integer(), nullable=False),
-        sa.Column("min_deposit", sa.Numeric(15, 2), nullable=True),
-        sa.Column("max_loan", sa.Numeric(15, 2), nullable=True),
+        sa.Column("min_deposit", sa.Numeric(15, 2), nullable=False),
+        sa.Column("max_loan", sa.Numeric(15, 2), nullable=False),
         sa.Column("getbc_time", sa.BigInteger(), nullable=False),
         sa.Column("username", sa.String(length=64), nullable=False),
         sa.Column("minecraft_username", sa.String(length=16), nullable=True),
@@ -28,7 +28,7 @@ def upgrade() -> None:
         sa.Column("last_interest_date", sa.String(length=32), nullable=True),
         sa.Column("inventory", sa.JSON(), nullable=False),
         sa.Column("minecraft_goods_count_season", sa.JSON(), nullable=False),
-        sa.Column("rub_balance", sa.Numeric(15, 2), nullable=True),
+        sa.Column("rub_balance", sa.Numeric(15, 2), nullable=False),
         sa.Column("farm_minigame", sa.JSON(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
@@ -54,4 +54,3 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_table("singletons")
     op.drop_table("users")
-

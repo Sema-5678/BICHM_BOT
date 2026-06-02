@@ -31,12 +31,12 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=False)
 
-    balance: Mapped[Decimal] = mapped_column(Numeric(15, 2, asdecimal=True), default=Decimal("60.00"))
-    debt: Mapped[Decimal] = mapped_column(Numeric(15, 2, asdecimal=True), default=Decimal("0.00"))
-    deposit: Mapped[Decimal] = mapped_column(Numeric(15, 2, asdecimal=True), default=Decimal("0.00"))
+    balance: Mapped[Decimal] = mapped_column(Numeric(15, 2, asdecimal=True), default=Decimal("60.00"), nullable=False)
+    debt: Mapped[Decimal] = mapped_column(Numeric(15, 2, asdecimal=True), default=Decimal("0.00"), nullable=False)
+    deposit: Mapped[Decimal] = mapped_column(Numeric(15, 2, asdecimal=True), default=Decimal("0.00"), nullable=False)
     credit_rating: Mapped[int] = mapped_column(Integer, default=100, nullable=False)
-    min_deposit: Mapped[Decimal] = mapped_column(Numeric(15, 2, asdecimal=True), default=Decimal("0.00"))
-    max_loan: Mapped[Decimal] = mapped_column(Numeric(15, 2, asdecimal=True), default=Decimal("0.00"))
+    min_deposit: Mapped[Decimal] = mapped_column(Numeric(15, 2, asdecimal=True), default=Decimal("0.00"), nullable=False)
+    max_loan: Mapped[Decimal] = mapped_column(Numeric(15, 2, asdecimal=True), default=Decimal("0.00"), nullable=False)
 
     getbc_time: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
     username: Mapped[str] = mapped_column(String(64), default="", nullable=False)
@@ -49,7 +49,7 @@ class User(Base):
 
     inventory: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
     minecraft_goods_count_season: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
-    rub_balance: Mapped[Decimal] = mapped_column(Numeric(15, 2, asdecimal=True), default=Decimal("0.00"))
+    rub_balance: Mapped[Decimal] = mapped_column(Numeric(15, 2, asdecimal=True), default=Decimal("0.00"), nullable=False)
     farm_minigame: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
 
 

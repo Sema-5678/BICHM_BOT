@@ -49,6 +49,16 @@ def _quantize_money(v: Decimal) -> Decimal:
     return v.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
+def _money_or_zero(v: Any) -> Decimal:
+    if v is None:
+        return Decimal("0.00")
+    try:
+        return _quantize_money(Decimal(str(v)))
+    except (InvalidOperation, TypeError, ValueError):
+        logger.exception("Invalid money value in database: %r", v)
+        return Decimal("0.00")
+
+
 def _validate_amount(v: Decimal) -> Decimal:
     try:
         v = Decimal(v)
@@ -76,10 +86,10 @@ def _user_to_card(user: User) -> "UserCardOut":
         id=int(user.id),
         username=user.username or "",
         minecraft_username=user.minecraft_username,
-        balance=Decimal(str(user.balance)),
-        rub_balance=Decimal(str(user.rub_balance)),
-        deposit=Decimal(str(user.deposit)),
-        debt=Decimal(str(user.debt)),
+        balance=_money_or_zero(user.balance),
+        rub_balance=_money_or_zero(user.rub_balance),
+        deposit=_money_or_zero(user.deposit),
+        debt=_money_or_zero(user.debt),
         credit_rating=int(user.credit_rating),
         date_create=int(user.date_create),
         date_update=int(user.date_update),
@@ -256,7 +266,7 @@ async def _apply_balance_change(
 
         result = await session.execute(select(User).where(User.id == telegram_id))
         user = result.scalar_one()
-        current = Decimal(str(getattr(user, field_name)))
+        current = _money_or_zero(getattr(user, field_name))
 
         new_value = amount if mode == "set" else (current + amount)
         if new_value < 0:
@@ -435,10 +445,10 @@ async def get_user_balances(telegram_id: int = Path(..., ge=1)) -> UserBalancesO
             raise HTTPException(status_code=404, detail="User not found")
         return UserBalancesOut(
             id=int(user.id),
-            balance=Decimal(str(user.balance)),
-            rub_balance=Decimal(str(user.rub_balance)),
-            deposit=Decimal(str(user.deposit)),
-            debt=Decimal(str(user.debt)),
+            balance=_money_or_zero(user.balance),
+            rub_balance=_money_or_zero(user.rub_balance),
+            deposit=_money_or_zero(user.deposit),
+            debt=_money_or_zero(user.debt),
             credit_rating=int(user.credit_rating),
         )
 
@@ -612,13 +622,13 @@ async def stats_top(limit: int = Query(10, ge=1, le=100)) -> StatsTopOut:
         result = await session.execute(stmt)
         items: list[StatsTopItem] = []
         for u in result.scalars().all():
-            total = Decimal(str(u.balance)) + Decimal(str(u.deposit))
+            total = _money_or_zero(u.balance) + _money_or_zero(u.deposit)
             items.append(
                 StatsTopItem(
                     id=int(u.id),
                     total=_quantize_money(total),
-                    balance=Decimal(str(u.balance)),
-                    deposit=Decimal(str(u.deposit)),
+                    balance=_money_or_zero(u.balance),
+                    deposit=_money_or_zero(u.deposit),
                 )
             )
         return StatsTopOut(items=items)
